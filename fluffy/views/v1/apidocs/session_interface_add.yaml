@@ -1,0 +1,79 @@
+Create a new interface in a session
+---
+tags:
+  - sessions
+  - interfaces
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: interface_name
+    in: path
+    type: string
+    required: true
+    description: Interface name
+  - name: body
+    in: body
+    schema:
+      id: Interface
+      required:
+        - interface
+      properties:
+        interface:
+          type: string
+          description: Interface
+responses:
+  201:
+    description: New interface created
+    schema:
+      id: InterfaceCreated
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  400:
+    description: Interface is not valid
+    schema:
+      id: InterfaceNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  409:
+    description: Interface already exists
+    schema:
+      id: InterfaceExists
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session interfaces
+    schema:
+      id: InterfaceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

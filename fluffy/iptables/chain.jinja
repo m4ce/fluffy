@@ -1,0 +1,1 @@
+iptables --table {{ table }}{% if builtin %} -P {{ name }} {{ chain['policy'] }}{% else %} -N {{ name }}{% endif %}

@@ -1,0 +1,19 @@
+Retrieve the active services
+---
+tags:
+  - services
+parameters: []
+responses:
+  200:
+    description: The list of active services
+  500:
+    description: There was an issue in accessing the list of active services
+    schema:
+      id: ServiceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

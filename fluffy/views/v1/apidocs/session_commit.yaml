@@ -1,0 +1,54 @@
+Commit rules in a session
+---
+tags:
+  - sessions
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: body
+    in: body
+    schema:
+      id: Commit
+      properties:
+        rollback:
+          description: Enable rollback
+          type: boolean
+          default: true
+        rollback_interval:
+          description: Rollback interval in seconds
+          type: integer
+          default: 60
+responses:
+  200:
+    description: Commit succeeded
+    schema:
+      id: SessionCommitOK
+      properties:
+        message:
+          type: string
+          description: API response
+  412:
+    description: Commit failed
+    schema:
+      id: SessionCommitFailed
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+  500:
+    description: There was an issue in committing the rules
+    schema:
+      id: SessionCommitError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

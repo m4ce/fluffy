@@ -1,0 +1,47 @@
+Retrieve a chain from a session
+---
+tags:
+  - sessions
+  - chains
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: table_name
+    in: path
+    type: string
+    required: true
+    enum: ['filter', 'nat', 'mangle', 'raw', 'security']
+    description: Packet filtering table
+  - name: chain_name
+    in: path
+    type: string
+    required: true
+    description: Chain name
+responses:
+  200:
+    description: The looked up chain
+  404:
+    description: Session or Chain not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

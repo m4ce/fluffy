@@ -1,0 +1,47 @@
+Delete a check in a session
+---
+tags:
+  - sessions
+  - checks
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: check_name
+    in: path
+    type: string
+    required: true
+    description: Check name
+responses:
+  200:
+    description: Check deleted
+    schema:
+      id: CheckDeleted
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session or check not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session checks
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

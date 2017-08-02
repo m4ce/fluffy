@@ -1,0 +1,41 @@
+Retrieve a chain from the list of active chains
+---
+tags:
+  - chains
+parameters:
+  - name: table_name
+    in: path
+    type: string
+    required: true
+    enum: ['filter', 'nat', 'mangle', 'raw', 'security']
+    description: Packet filtering table
+  - name: chain_name
+    in: path
+    type: string
+    required: true
+    description: Chain name
+responses:
+  200:
+    description: The looked up chain
+  404:
+    description: Chain not found
+    schema:
+      id: ChainNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the active chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

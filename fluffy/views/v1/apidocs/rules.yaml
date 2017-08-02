@@ -1,0 +1,19 @@
+Retrieve the active rules
+---
+tags:
+  - rules
+parameters: []
+responses:
+  200:
+    description: The ordered list of active rules
+  500:
+    description: There was an issue in accessing the list of active rules
+    schema:
+      id: RuleError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

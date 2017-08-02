@@ -1,0 +1,6 @@
+*.pyc
+.vagrant
+/dist/
+/*.egg-info
+/*.egg
+/build/

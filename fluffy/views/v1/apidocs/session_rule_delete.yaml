@@ -1,0 +1,47 @@
+Delete a rule in a session
+---
+tags:
+  - sessions
+  - rules
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: rule_name
+    in: path
+    type: string
+    required: true
+    description: Rule name
+responses:
+  200:
+    description: Rule deleted
+    schema:
+      id: RuleDeleted
+      properties:
+        message:
+          type: string
+          description: API response
+  404:
+    description: Session or Rule not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+  500:
+    description: There was an issue in accessing the session rules
+    schema:
+      id: RuleError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

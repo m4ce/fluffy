@@ -1,0 +1,24 @@
+Retrieve the active addressbook
+---
+tags:
+  - addressbook
+parameters:
+  - name: recurse
+    in: query
+    type: boolean
+    required: false
+    description: Look up the addressbook recursively
+responses:
+  200:
+    description: The list of addresses in the active addressbook
+  500:
+    description: There was an issue in accessing the active addressbook
+    schema:
+      id: AddressBookError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

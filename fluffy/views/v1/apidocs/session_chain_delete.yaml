@@ -1,0 +1,69 @@
+Delete a chain in a session
+---
+tags:
+  - sessions
+  - chains
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: table_name
+    in: path
+    type: string
+    required: true
+    enum: ['filter', 'nat', 'mangle', 'raw', 'security']
+    description: Packet filtering table
+  - name: chain_name
+    in: path
+    type: string
+    required: true
+    description: Chain name
+responses:
+  200:
+    description: Chain deleted
+    schema:
+      id: ChainDeleted
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session or Chain not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  406:
+    description: Chain is in use by one or more rules
+    schema:
+      id: ChainInUse
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+        rules:
+          description: List of rules that are using the chain
+          type: array
+          items:
+            type: string
+  500:
+    description: There was an issue in accessing the session chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

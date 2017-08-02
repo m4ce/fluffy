@@ -1,0 +1,93 @@
+Create a new check in a session
+---
+tags:
+  - sessions
+  - checks
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: check_name
+    in: path
+    type: string
+    required: true
+    description: Check name
+  - name: body
+    in: body
+    schema:
+      id: Check
+      properties:
+        type:
+          description: Check type
+          enum: ['tcp', 'exec']
+          type: string
+        host:
+          description: TCP host
+          type: string
+          default: '0.0.0.0'
+        port:
+          description: TCP port
+          type: integer
+        command:
+          description: Command to execute
+          type: string
+          default: absent
+        timeout:
+          description: Check timeout in seconds
+          type: integer
+          default: 5
+responses:
+  201:
+    description: New check created
+    schema:
+      id: CheckCreated
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  400:
+    description: Check is not valid
+    schema:
+      id: CheckNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  409:
+    description: Check already exists
+    schema:
+      id: CheckExists
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session checks
+    schema:
+      id: CheckError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

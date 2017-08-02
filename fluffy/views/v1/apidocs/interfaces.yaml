@@ -1,0 +1,19 @@
+Retrieve the active interfaces
+---
+tags:
+  - interfaces
+parameters: []
+responses:
+  200:
+    description: The list of active interfaces
+  500:
+    description: There was an issue in accessing the active interfaces
+    schema:
+      id: InterfaceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

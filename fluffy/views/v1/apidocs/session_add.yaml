@@ -1,0 +1,53 @@
+Create a new session
+---
+tags:
+  - sessions
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: body
+    in: body
+    schema:
+      id: SessionAdd
+      properties:
+        owner:
+          description: User that owns the session
+          type: string
+        ttl:
+          description: Time to live
+          type: integer
+          default: 3600
+responses:
+  201:
+    description: New session created
+    schema:
+      id: SessionCreated
+      properties:
+        message:
+          description: API response
+          type: string
+  409:
+    description: Session already exists
+    schema:
+      id: SessionExists
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in creating the session
+    schema:
+      id: SessionError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

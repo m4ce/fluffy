@@ -1,0 +1,63 @@
+Delete a service in a session
+---
+tags:
+  - sessions
+  - services
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: service_name
+    in: path
+    type: string
+    required: true
+    description: Service name
+responses:
+  200:
+    description: Service deleted
+    schema:
+      id: ServiceDeleted
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session or Service not be found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  406:
+    description: Service is in use by one or more rules
+    schema:
+      id: ServiceInUse
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+        rules:
+          description: List of rules that are using the service
+          type: array
+          items:
+            type: string
+  500:
+    description: There was an issue in accessing the session services
+    schema:
+      id: ServiceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

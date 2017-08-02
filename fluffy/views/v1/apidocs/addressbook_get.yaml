@@ -1,0 +1,40 @@
+Retrieve an address from the active addressbook
+---
+tags:
+  - addressbook
+parameters:
+  - name: address_name
+    in: path
+    type: string
+    required: true
+    description: Address to lookup
+  - name: recurse
+    in: query
+    type: boolean
+    required: false
+    description: Look up the address recursively
+responses:
+  200:
+    description: The looked up address
+  404:
+    description: Address not found
+    schema:
+      id: AddressNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the active addressbook
+    schema:
+      id: AddressError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

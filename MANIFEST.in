@@ -1,0 +1,4 @@
+include README.md
+include fluffy/views/*/apidocs/*.yaml
+include fluffy/templates/*.html
+include fluffy/iptables/*.jinja

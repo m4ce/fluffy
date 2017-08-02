@@ -1,0 +1,85 @@
+Create a new chain in a session
+---
+tags:
+  - sessions
+  - chains
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: table_name
+    in: path
+    type: string
+    required: true
+    enum: ['filter', 'nat', 'mangle', 'raw', 'security']
+    description: Packet filtering table
+  - name: chain_name
+    in: path
+    type: string
+    required: true
+    description: Chain name
+  - name: body
+    in: body
+    schema:
+      id: Chain
+      properties:
+        policy:
+          description: Default policy
+          type: string
+          enum: ['ACCEPT', 'DROP', 'RETURN']
+          default: ACCEPT
+responses:
+  201:
+    description: New chain created
+    schema:
+      id: ChainCreated
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  400:
+    description: Chain is not valid
+    schema:
+      id: ChainNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  409:
+    description: Chain already exists
+    schema:
+      id: ChainExists
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

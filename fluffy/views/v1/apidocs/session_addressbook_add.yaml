@@ -1,0 +1,79 @@
+Create a new address in a session addressbook
+---
+tags:
+  - sessions
+  - addressbook
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: address_name
+    in: path
+    type: string
+    required: true
+    description: Address name
+  - name: body
+    in: body
+    schema:
+      id: Address
+      required:
+        - address
+      properties:
+        address:
+          type: string
+          description: Address
+responses:
+  201:
+    description: New address created
+    schema:
+      id: AddressCreated
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  400:
+    description: Address is not valid
+    schema:
+      id: AddressNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  409:
+    description: Address already exists
+    schema:
+      id: AddressExists
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session addressbook
+    schema:
+      id: AddressError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

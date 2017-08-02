@@ -1,0 +1,41 @@
+Retrieve a check from a session
+---
+tags:
+  - sessions
+  - check
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: check_name
+    in: path
+    type: string
+    required: true
+    description: Check name
+responses:
+  200:
+    description: The looked up check
+  404:
+    description: Session or Check not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session checks
+    schema:
+      id: CheckError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

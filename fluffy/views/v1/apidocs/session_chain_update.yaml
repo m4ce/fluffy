@@ -1,0 +1,82 @@
+Update a chain in a session
+---
+tags:
+  - sessions
+  - chains
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: table_name
+    in: path
+    type: string
+    required: true
+    enum: ['filter', 'nat', 'mangle', 'raw', 'security']
+    description: Packet filtering table
+  - name: chain_name
+    in: path
+    type: string
+    required: true
+    description: Chain name
+  - name: body
+    in: body
+    schema:
+      id: Chain
+      properties:
+        policy:
+          type: string
+          enum: ['ACCEPT', 'DROP']
+          default: ACCEPT
+          description: Default policy
+responses:
+  200:
+    description: Chain updated
+    schema:
+      id: ChainUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  204:
+    description: Chain not updated (no changes)
+    schema:
+      id: ChainNotUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  400:
+    description: Chain is not valid
+    schema:
+      id: ChainNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  404:
+    description: Session or Chain not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

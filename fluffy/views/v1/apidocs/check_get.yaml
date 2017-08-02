@@ -1,0 +1,35 @@
+Retrieve a check from the list of active rollback checks
+---
+tags:
+  - checks
+parameters:
+  - name: check_name
+    in: path
+    type: string
+    required: true
+    description: Check to lookup
+responses:
+  200:
+    description: The looked up check
+  404:
+    description: Check not found
+    schema:
+      id: CheckNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the active rollback checks
+    schema:
+      id: CheckError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

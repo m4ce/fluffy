@@ -1,0 +1,46 @@
+Retrieve an address from a session addressbook
+---
+tags:
+  - sessions
+  - addressbook
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: address_name
+    in: path
+    type: string
+    required: true
+    description: Address to lookup
+  - name: recurse
+    in: query
+    type: boolean
+    required: false
+    description: Look up the address recursively
+responses:
+  200:
+    description: The looked up address
+  404:
+    description: Session or Address not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the addressbook
+    schema:
+      id: AddressError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

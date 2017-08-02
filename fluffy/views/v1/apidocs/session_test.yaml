@@ -1,0 +1,41 @@
+Test rules in a session
+---
+tags:
+  - sessions
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+responses:
+  200:
+    description: Rules test passed
+    schema:
+      id: SessionTestOK
+      properties:
+        message:
+          description: API response
+          type: string
+  412:
+    description: Rules test failed
+    schema:
+      id: SessionTestFailed
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in testing the session rules
+    schema:
+      id: SessionTestError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

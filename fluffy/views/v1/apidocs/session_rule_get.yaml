@@ -1,0 +1,41 @@
+Retrieve a rule from a session
+---
+tags:
+  - sessions
+  - rules
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: rule_name
+    in: path
+    type: string
+    required: true
+    description: Rule to lookup
+responses:
+  200:
+    description: The looked up rule
+  404:
+    description: Session or Rule not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session rules
+    schema:
+      id: RuleError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

@@ -1,0 +1,35 @@
+Retrieve a service from the list of active services
+---
+tags:
+  - services
+parameters:
+  - name: service_name
+    in: path
+    type: string
+    required: true
+    description: Service name
+responses:
+  200:
+    description: The looked up service
+  404:
+    description: Service not found
+    schema:
+      id: ServiceNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the list of active services
+    schema:
+      id: ServiceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

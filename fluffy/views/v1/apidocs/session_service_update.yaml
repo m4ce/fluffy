@@ -1,0 +1,87 @@
+Update a service in a session
+---
+tags:
+  - sessions
+  - services
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: service_name
+    in: path
+    type: string
+    required: true
+    description: Service name
+  - name: body
+    in: body
+    schema:
+      id: Service
+      properties:
+        protocol:
+          description: Service protocol
+          enum: ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']
+          type: string
+        src_port:
+          description: Service source port(s)
+          type: array
+          items:
+            type: integer
+          default: []
+        dst_port:
+          description: Service destination port(s)
+          type: array
+          items:
+            type: integer
+          default: []
+responses:
+  200:
+    description: Service updated
+    schema:
+      id: ServiceUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  204:
+    description: Service not updated (no changes)
+    schema:
+      id: ServiceNotUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  400:
+    description: Service is not valid
+    schema:
+      id: ServiceNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  404:
+    description: Session or Service not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session services
+    schema:
+      id: ServiceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

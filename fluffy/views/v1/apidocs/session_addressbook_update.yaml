@@ -1,0 +1,76 @@
+Update an address in a session addressbook
+---
+tags:
+  - sessions
+  - addressbook
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: address_name
+    in: path
+    type: string
+    required: true
+    description: Address name
+  - name: body
+    in: body
+    schema:
+      id: Address
+      required:
+        - address
+      properties:
+        address:
+          type: string
+          description: Address
+responses:
+  200:
+    description: Address updated
+    schema:
+      id: AddressUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  204:
+    description: Address not updated (no changes)
+    schema:
+      id: AddressNotUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  400:
+    description: Address is not valid
+    schema:
+      id: AddressNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  404:
+    description: Session or Address not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session addressbook
+    schema:
+      id: AddressError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

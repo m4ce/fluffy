@@ -1,0 +1,237 @@
+Create a new rule in a session
+---
+tags:
+  - sessions
+  - rules
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+    in: path
+  - name: rule_name
+    type: string
+    required: true
+    description: Rule name
+  - name: body
+    in: body
+    schema:
+      id: Rule
+      required:
+        - chain
+        - table
+      properties:
+        chain:
+          description: Rule chain name
+          type: string
+        table:
+          description: Rule packet filtering table
+          type: string
+        before_rule:
+          description: Add the new rule before the specified rule name
+          type: string
+        after_rule:
+          description: Add the new rule after the specified rule name
+          type: string
+        action:
+          description: Action
+          type: string
+          enum: ['ACCEPT', 'DROP', 'REJECT', 'QUEUE', 'RETURN', 'DNAT', 'SNAT', 'LOG', 'MASQUERADE', 'REDIRECT', 'MARK', 'TCPMSS']
+        jump:
+          description: Jump
+          type: string
+        negate_protocol:
+          description: Negate protocol
+          type: boolean
+          default: false
+        protocol:
+          description: Protocol
+          type: string
+          enum: ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']
+        negate_icmp_type:
+          description: Negate ICMP type
+          type: boolean
+          default: false
+        icmp_type:
+          description: ICMP Type
+          type: string
+          enum: ['any', 'echo-reply', 'echo-request']
+        tcp_flags:
+          description: TCP flags
+          type: string
+        negate_tcp_flags:
+          description: Negate TCP flags
+          type: boolean
+          default: false
+        ctstate:
+          description: Conntrack state
+          type: array
+          items:
+            type: string
+        negate_ctstate:
+          description: Negate conntrack state
+          type: boolean
+          default: false
+        state:
+          description: State
+          type: array
+          items:
+            type: string
+        negate_state:
+          description: Negate state
+          type: boolean
+          default: false
+        src_address_range:
+          description: Source range address(es)
+          type: array
+          items:
+            type: string
+        negate_src_address_range:
+          description: Negate source range address(es)
+          type: boolean
+          default: false
+        dst_address_range:
+          description: Destination range address(es)
+          type: array
+          items:
+            type: string
+        negate_dst_address_range:
+          description: Negate destination range address(es)
+          type: boolean
+          default: false
+        in_interface:
+          description: Input interface
+          type: string
+        negate_in_interface:
+          description: Negate input interface
+          type: boolean
+          default: false
+        out_interface:
+          description: Output interface
+          type: string
+        negate_out_interface:
+          description: Negate output interface
+          type: boolean
+          default: false
+        src_address:
+          description: Source address(es)
+          type: array
+          items:
+            type: string
+        negate_src_address:
+          description: Negate source address(es)
+          type: boolean
+          default: false
+        dst_address:
+          description: Destination address(es)
+          type: array
+          items:
+            type: string
+        negate_dst_address:
+          description: Negate destination address(es)
+          type: boolean
+          default: false
+        src_service:
+          description: Source service(s)
+          type: array
+          items:
+            type: string
+        negate_src_service:
+          description: Negate source service(s)
+          type: boolean
+          default: false
+        dst_service:
+          description: Destination service(s)
+          type: array
+          items:
+            type: string
+        negate_dst_service:
+          description: Negate destination service(s)
+          type: boolean
+          default: false
+        reject_with:
+          description: Reject with
+          type: string
+          enum: ['icmp-net-unreachable', 'icmp-host-unreachable', 'icmp-port-unreachable', 'icmp-proto-unreachable', 'icmp-net-prohibited', 'icmp-host-prohibited', 'icmp-admin-prohibited']
+        set_mss:
+          description: Set maximum segment size (MSS)
+          type: integer
+        clamp_mss_to_pmtu:
+          description: Clamp MSS to path MTU
+          type: boolean
+          default: false
+        to_src:
+          description: Source NAT
+          type: string
+        to_dst:
+          description: Destination NAT
+          type: string
+        limit:
+          description: Limit rate
+          type: string
+        limit_burst:
+          description: Limit burst
+          type: string
+        log_prefix:
+          description: Log prefix
+          type: string
+        log_level:
+          description: Log level
+          type: string
+        comment:
+          description: Comment
+          type: string
+responses:
+  201:
+    description: New rule created
+    schema:
+      id: RuleCreated
+      properties:
+        message:
+          type: string
+          description: API response
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+  400:
+    description: Rule is not valid
+    schema:
+      id: RuleNotValid
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+  409:
+    description: Rule already exists
+    schema:
+      id: RuleExists
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+  500:
+    description: There was an issue in accessing the session interfaces
+    schema:
+      id: RuleError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

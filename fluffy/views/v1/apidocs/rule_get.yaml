@@ -1,0 +1,35 @@
+Retrieve a rule from the list of active rules
+---
+tags:
+  - rules
+parameters:
+  - name: rule_name
+    in: path
+    type: string
+    required: true
+    description: Rule to lookup
+responses:
+  200:
+    description: The looked up rule
+  404:
+    description: Rule not found
+    schema:
+      id: RuleNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the active rules
+    schema:
+      id: RuleError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

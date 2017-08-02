@@ -1,0 +1,41 @@
+Retrieve the session addressbook
+---
+tags:
+  - sessions
+  - addressbook
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: recurse
+    in: query
+    type: boolean
+    required: false
+    description: Look up the session addressbook recursively
+responses:
+  200:
+    description: A list of addresses present in the given session
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session addressbook
+    schema:
+      id: SessionError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

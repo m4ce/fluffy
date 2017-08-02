@@ -1,0 +1,41 @@
+Delete an existing session
+---
+tags:
+  - sessions
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+responses:
+  200:
+    description: Session deleted
+    schema:
+      id: SessionDeleted
+      properties:
+        message:
+          description: API response
+          type: string
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in deleting the session
+    schema:
+      id: SessionError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

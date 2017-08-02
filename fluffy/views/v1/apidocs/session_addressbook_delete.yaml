@@ -1,0 +1,52 @@
+Delete an address in a session addressbook
+---
+tags:
+  - sessions
+  - addressbook
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: address_name
+    in: path
+    type: string
+    required: true
+    description: Address name
+responses:
+  200:
+    description: Address deleted
+    schema:
+      id: AddressDeleted
+      properties:
+        message:
+          description: API response
+          type: string
+  406:
+    description: Address is in use by one or more rules
+    schema:
+      id: AddressInUse
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+        rules:
+          description: List of rules using the address
+          type: array
+          items:
+            type: string
+  500:
+    description: There was an issue in accessing the addressbook
+    schema:
+      id: AddressError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

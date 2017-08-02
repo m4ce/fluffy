@@ -1,0 +1,37 @@
+Retrieve the session rollback checks
+---
+tags:
+  - sessions
+  - checks
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+responses:
+  200:
+    description: A list of rollback checks defined in the given session
+  404:
+    description: Session not found
+    schema:
+      id: SessionNotFound
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message
+
+  500:
+    description: There was an issue in accessing the session rollback checks
+    schema:
+      id: CheckError
+      properties:
+        message:
+          type: string
+          description: API response
+        error:
+          type: string
+          description: Error message

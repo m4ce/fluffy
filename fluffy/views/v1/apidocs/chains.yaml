@@ -1,0 +1,19 @@
+Retrieve the active chains
+---
+tags:
+  - chains
+parameters: []
+responses:
+  200:
+    description: The list of active chains
+  500:
+    description: There was an issue in accessing the active chains
+    schema:
+      id: ChainError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

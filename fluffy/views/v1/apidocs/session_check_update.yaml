@@ -1,0 +1,87 @@
+Update a check in a session
+---
+tags:
+  - sessions
+  - checks
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: check_name
+    in: path
+    type: string
+    required: true
+    description: Check name
+  - name: body
+    in: body
+    schema:
+      id: Check
+      properties:
+        type:
+          type: string
+          enum: ['tcp', 'exec']
+          description: Check type
+        host:
+          type: string
+          description: TCP host
+        port:
+          type: integer
+          description: TCP host
+        command:
+          type: string
+          description: Command to execute
+        timeout:
+          type: integer
+          description: Check timeout
+responses:
+  200:
+    description: Check updated
+    schema:
+      id: CheckUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  204:
+    description: Check not updated (no changes)
+    schema:
+      id: CheckNotUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  400:
+    description: Check is not valid
+    schema:
+      id: CheckNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  404:
+    description: Session or Check not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session checks
+    schema:
+      id: CheckError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

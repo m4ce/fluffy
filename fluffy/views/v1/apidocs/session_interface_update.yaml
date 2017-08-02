@@ -1,0 +1,76 @@
+Update an interface in a session
+---
+tags:
+  - sessions
+  - interfaces
+parameters:
+  - name: session_name
+    in: path
+    type: string
+    required: true
+    description: Session name
+  - name: interface_name
+    in: path
+    type: string
+    required: true
+    description: Interface name
+  - name: body
+    in: body
+    schema:
+      id: Interface
+      required:
+        - interface
+      properties:
+        address:
+          description: Interface
+          type: string
+responses:
+  200:
+    description: Interface updated
+    schema:
+      id: InterfaceUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  204:
+    description: Interface not updated (no changes)
+    schema:
+      id: InterfaceNotUpdated
+      properties:
+        message:
+          description: API response
+          type: string
+  400:
+    description: Interface is not valid
+    schema:
+      id: InterfaceNotValid
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  404:
+    description: Session or Interface not found
+    schema:
+      id: NotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the session interfaces
+    schema:
+      id: InterfaceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string

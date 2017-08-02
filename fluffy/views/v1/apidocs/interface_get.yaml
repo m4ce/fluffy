@@ -1,0 +1,35 @@
+Retrieve an interface from the list of active interfaces
+---
+tags:
+  - interfaces
+parameters:
+  - name: interface_name
+    in: path
+    type: string
+    required: true
+    description: Interface to lookup
+responses:
+  200:
+    description: The looked up interface
+  404:
+    description: Interface not found
+    schema:
+      id: InterfaceNotFound
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
+  500:
+    description: There was an issue in accessing the active interfaces
+    schema:
+      id: InterfaceError
+      properties:
+        message:
+          description: API response
+          type: string
+        error:
+          description: Error message
+          type: string
