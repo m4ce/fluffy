@@ -415,7 +415,7 @@ class Session(object):
         j2env = Environment(loader=FileSystemLoader(
             self._templates_dir), trim_blocks=True)
         ret.append(j2env.get_template(
-            'header.jinja').render({'name': self.name}))
+            'header.jinja').render({'name': self.name()}))
 
         # flush tables first
         for table in ['filter', 'nat', 'mangle', 'raw', 'security']:
@@ -517,7 +517,7 @@ class Session(object):
     def _cancel_rollback(self):
         with self._rollback_cancel_lock:
             logger.info(
-                "Canceling rollback timer in session {}".format(self.name))
+                "Canceling rollback timer in session {}".format(self.name()))
             if self._rollback_timer:
                 self._rollback_timer.cancel()
             self._rollback_timer = None
@@ -532,7 +532,7 @@ class Session(object):
                     "Will not rollback as configuration has already been confirmed")
 
             logger.warning(
-                "Rolling back configuration in session {}".format(self.name))
+                "Rolling back configuration in session {}".format(self.name()))
             rules = self.build(chains=self._active_chains, interfaces=self._active_interfaces,
                                addressbook=self._active_addressbook, rules=self._active_rules, services=self._active_services)
             self._load(rules)
@@ -574,18 +574,18 @@ class Session(object):
             ok, err = self.test()
             if ok:
                 logger.info(
-                    "Configuration tested successfully in session {}".format(self.name))
+                    "Configuration tested successfully in session {}".format(self.name()))
             else:
                 raise SessionCommitError(
                     "Configuration test failure (Error: {})".format(err))
 
         # global lock
         logger.debug(
-            "Waiting to acquire global commit lock in session {}".format(self.name))
+            "Waiting to acquire global commit lock in session {}".format(self.name()))
         self._status = 'Waiting to acquire global commit lock ..'
         with global_commit_lock:
             logger.debug(
-                "Global commit lock acquired in session {}".format(self.name))
+                "Global commit lock acquired in session {}".format(self.name()))
             self._status = 'Configuration commit in progress (lock acquired)'
 
             # has the initial session configuration shifted from the active?
@@ -605,12 +605,12 @@ class Session(object):
 
             self._committed = True
             logger.info(
-                "Configuration committed in session {}".format(self.name))
+                "Configuration committed in session {}".format(self.name()))
             self._status = 'Configuration commited'
 
             if rollback:
                 logger.info(
-                    "Running rollback checks in session {}".format(self.name))
+                    "Running rollback checks in session {}".format(self.name()))
                 for check_name, check in self.checks:
                     logger.info("Running check '{}'".format(check_name))
                     try:
@@ -622,7 +622,7 @@ class Session(object):
 
                 if rollback_interval and rollback_interval > 0:
                     logger.info("Set up rollback timer in session {} with a timeout of {}s".format(
-                        self.name, rollback_interval))
+                        self.name(), rollback_interval))
                     self._rollback_timer = Timer(
                         rollback_interval, self.rollback)
                     self._rollback_timer.daemon = True
@@ -634,7 +634,7 @@ class Session(object):
             else:
                 self.confirm()
         logger.debug(
-            "Global commit lock released in session {}".format(self.name))
+            "Global commit lock released in session {}".format(self.name()))
 
     def confirm(self):
         """Confirm configuration"""
@@ -666,7 +666,7 @@ class Session(object):
                 self._confirmed = True
 
                 logger.info(
-                    "Configuration confirmed in session {}".format(self.name))
+                    "Configuration confirmed in session {}".format(self.name()))
 
                 # cancel rollback timer if active
                 if self._rollback_in_progress():
@@ -684,7 +684,7 @@ class Session(object):
         except SessionCommitError as e:
             self._status = e.message
             logger.error(
-                "Failed to commit configuration in session {} - {}".format(self.name, e.message))
+                "Failed to commit configuration in session {} - {}".format(self.name(), e.message))
 
     def commit(self, force=False, async=False, rollback=True, rollback_interval=60):
         """Commit configuration
@@ -733,7 +733,7 @@ class Session(object):
         info['committed'] = self.committed()
         info['confirmed'] = self.confirmed()
 
-        if self.rollback_in_progress():
+        if self._rollback_in_progress():
             info['status'] = "Configuration committed - rollback will take place in {}s unless configuration is confirmed".format(
                 self._rollback_seconds_left())
         else:
@@ -745,16 +745,16 @@ class Session(object):
         """Close session"""
 
         # cancel any outstanding rollback timer
-        if self.rollback_in_progress():
+        if self._rollback_in_progress():
             self._cancel_rollback()
 
         if self._commit_in_progress():
             logger.info(
-                "Waiting for commit process to finish in session {}".format(self.name))
+                "Waiting for commit process to finish in session {}".format(self.name()))
             # self._commit_thr.join()
             self.__commit_job.result()
 
         if self.committed() and self.confirmed() == False:
             logger.warning(
-                "Session {} is terminating - configuration has not been confirmed, forcing rollback".format(self.name))
+                "Session {} is terminating - configuration has not been confirmed, forcing rollback".format(self.name()))
             self.rollback()
