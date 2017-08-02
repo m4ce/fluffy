@@ -6,9 +6,9 @@ with open(os.path.join(os.getcwd(), 'README.md')) as f:
     readme = f.read()
 
 setup(
-    name='fluffy',
+    name='pyfluffy',
     version=version,
-    description='Fluffy - a FWaaS (Firewall as a Service)',
+    description='Fluffy - A Firewall as a Service',
     long_description=readme,
     author='Matteo Cerutti',
     author_email='matteo.cerutti@hotmail.co.uk',
