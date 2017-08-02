@@ -23,23 +23,48 @@ global_commit_lock = Lock()
 
 
 class Sessions(object):
+    """This class implements the Fluffy sessions"""
+
     def __init__(self, rules, data_dir, checks, max_sessions):
+        """Initialize an instance of the Sessions class
+
+        Args:
+            rules (Rules): The active rules
+            checks (Checks): The active checks
+            max_sessions (int): The maximum number of sessions allowed
+
+        """
+
         self._sessions = {}
+        """dict: The current sessions"""
+
         self._active_rules = rules
+        """dict: Reference to the active rules"""
+
         self._sessions_dir = os.path.join(data_dir, 'sessions')
+        """dict: The sessions directory"""
+
         self._templates_dir = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), 'iptables')
+        """dict: The templates location"""
+
         self._active_checks = checks
+        """dict: The active checks"""
+
         self._max_sessions = max_sessions
+        """dict: The maximum number of sessions allowed"""
 
         # Thread pool
         self._executor = ThreadPoolExecutor(max_sessions)
+        """dict: The ThreadPoolExecutor service"""
 
         # TTL timers
         self._expiration_timers = {}
+        """dict: Timers for sessions expiration"""
 
         # synchronize delete operations
         self._delete_lock = Lock()
+        """dict: A lock to synchronize sessions deletions"""
 
         # create sessions directory
         if not os.path.exists(self._sessions_dir):
@@ -54,12 +79,41 @@ class Sessions(object):
         atexit.register(self._exit)
 
     def __getitem__(self, key):
+        """Retrieve a session
+
+        Args:
+            key (str): The session to lookup
+
+        Returns:
+            dict: The looked up session
+
+        """
+
         return self.lookup(key)
 
     def __iter__(self):
+        """Retrieve all sessions
+
+        Returns:
+            iterator: The sessions
+
+        """
+
         return self._sessions.iteritems()
 
     def add(self, name, ttl=3600, owner=None):
+        """Add a new session
+
+        Args:
+            name (str): The session name
+            ttl (int): The session TTL
+            owner (Optional[str]): The session owner
+
+        Raises:
+            SessionExists, SessionNotValid, SessionError
+
+        """
+
         if self.exists(name):
             raise SessionExists("Session already exists")
 
@@ -89,6 +143,13 @@ class Sessions(object):
         return self._sessions[name]
 
     def _expire(self, name):
+        """Expire a session
+
+        Args:
+            name (str): The session name
+
+        """
+
         logger.warning(
             "Session {} TTL has expired, deleting session".format(name))
         try:
@@ -97,6 +158,16 @@ class Sessions(object):
             pass
 
     def delete(self, name):
+        """Delete a session
+
+        Args:
+            name (str): The session name
+
+        Raises:
+            SessionNotFound
+
+        """
+
         with self._delete_lock:
             if not self.exists(name):
                 raise SessionNotFound("Session not found")
@@ -111,6 +182,16 @@ class Sessions(object):
                 del self._expiration_timers[name]
 
     def exists(self, name):
+        """Returns whether a session exists or not
+
+        Args:
+            name (str): The rule
+
+        Returns:
+            bool: True if the session exists, else False
+
+        """
+
         try:
             self.lookup(name)
         except SessionNotFound:
@@ -119,12 +200,27 @@ class Sessions(object):
         return True
 
     def lookup(self, name):
+        """Look up a session
+
+        Args:
+            name (str): The session
+
+        Returns:
+            dict: The looked up session entry
+
+        Raises:
+            SessionNotFound
+
+        """
+
         try:
             return self._sessions[name]
         except KeyError:
             raise SessionNotFound("Session not found")
 
     def _exit(self):
+        """Function invoked on exit"""
+
         for name in self._sessions.keys():
             self.delete(name)
 

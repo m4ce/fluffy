@@ -534,7 +534,7 @@ class Rules(object):
         """Delete a rule
 
         Args:
-            name (string): The rule name
+            name (str): The rule name
 
         Raises:
             RuleNotFound, RuleInUse, RuleNotValid
@@ -567,7 +567,7 @@ class Rules(object):
         """Returns whether a rule exists or not
 
         Args:
-            name (string): The rule
+            name (str): The rule
 
         Returns:
             bool: True if the rule exists, else False
@@ -585,7 +585,7 @@ class Rules(object):
         """Look up a rule
 
         Args:
-            name (string): The rule
+            name (str): The rule
 
         Returns:
             dict: The looked up rule entry

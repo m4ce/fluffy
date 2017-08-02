@@ -24,7 +24,7 @@ class Chains(object):
 
         Args:
             tables (dict): A dictionary describing the chains indexed by packet routing tables
-            db (string): Location to the chains database
+            db (str): Location to the chains database
 
         """
 
@@ -45,7 +45,7 @@ class Chains(object):
                     self.add(name, table)
 
         self._db = db
-        """string: The chains database location"""
+        """str: The chains database location"""
 
     def __iter__(self):
         """Retrieve the chains
@@ -93,8 +93,8 @@ class Chains(object):
         """Returns whether a chain is built-in or not
 
         Args:
-            name (string): The name of the chain
-            table (string): The name of the routing table
+            name (str): The name of the chain
+            table (str): The name of the routing table
 
         Returns:
             bool: True if the chain is built-in, else False
@@ -108,7 +108,7 @@ class Chains(object):
         """Load the chains from the database
 
         Args:
-            db (string): The chains database
+            db (str): The chains database
 
         Returns:
             Chains: An instance of the Chains class
@@ -153,8 +153,8 @@ class Chains(object):
         """Add a new chain
 
         Args:
-            name (string): The chain name
-            table (string): The table name
+            name (str): The chain name
+            table (str): The table name
             **kwargs: Arbitrary keywords arguments
 
         Raises:
@@ -205,8 +205,8 @@ class Chains(object):
         """Update a chain
 
         Args:
-            name (string): The chain name
-            table (string): The table name
+            name (str): The chain name
+            table (str): The table name
             **kwargs: Arbitrary keywords arguments
 
         Raises:
@@ -241,8 +241,8 @@ class Chains(object):
         """Delete a chain
 
         Args:
-            name (string): The chain name
-            table (string): The table name
+            name (str): The chain name
+            table (str): The table name
 
         Raises:
             ChainNotFound, ChainNotValid, ChainInUse
@@ -266,8 +266,8 @@ class Chains(object):
         """Look up a chain
 
         Args:
-            name (string): The chain name
-            table (string): The table name
+            name (str): The chain name
+            table (str): The table name
 
         Returns:
             dict: The looked up chain entry
@@ -286,8 +286,8 @@ class Chains(object):
         """Returns whether a chain exists or not
 
         Args:
-            name (string): The chain name
-            table (string): The table name
+            name (str): The chain name
+            table (str): The table name
 
         Returns:
             bool: True if the chain exists, else False
@@ -308,9 +308,9 @@ class Chains(object):
         """Add a rule dependency to the given chain entry
 
         Args:
-            chain (string): The chain name
-            table (string): The table name
-            rule (string): The rule name
+            chain (str): The chain name
+            table (str): The table name
+            rule (str): The rule name
 
         Raises:
             ChainNotFound
@@ -327,9 +327,9 @@ class Chains(object):
         """Delete a rule dependency for the given chain entry
 
         Args:
-            chain (string): The chain name
-            table (string): The table name
-            rule (string): The rule name
+            chain (str): The chain name
+            table (str): The table name
+            rule (str): The rule name
 
         Raises:
             ChainNotFound
@@ -347,8 +347,8 @@ class Chains(object):
         """Validate a chain's configuration
 
         Args:
-            name (string): The chain name
-            table (string) The table name
+            name (str): The chain name
+            table (str) The table name
             chain (dict): The chain settings
 
         """
