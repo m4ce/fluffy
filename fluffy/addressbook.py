@@ -22,7 +22,7 @@ class AddressBook(object):
 
         Args:
             addressbook (dict): A dictionary describing the addressbook
-            db (string): Location to the addressbook database
+            db (str): Location to the addressbook database
 
         """
 
@@ -46,13 +46,13 @@ class AddressBook(object):
             self.add(name, address, init=True)
 
         self._db = db
-        """dict: The addressbook database location"""
+        """str: The addressbook database location"""
 
     def __getitem__(self, key):
-        """Retrieve an address from the addressbook
+        """Retrieve an address
 
         Args:
-            key (string): The address to lookup
+            key (str): The address to lookup
 
         Returns:
             list: The looked up address
@@ -76,7 +76,7 @@ class AddressBook(object):
         """Update the addressbook
 
         Args:
-            obj (AddressBook): The updated addressbook
+            obj (AddressBook): The updated object
 
         """
 
@@ -107,7 +107,7 @@ class AddressBook(object):
         """Retrieve the addressbook.
 
         Args:
-            recurse (boolean): Enable recusive look up in the addressbook
+            recurse (bool): Enable recusive look up in the addressbook
 
         Returns:
             iterator: The addressbook
@@ -125,10 +125,10 @@ class AddressBook(object):
         """Returns whether an address is reserved or not
 
         Args:
-            name (string): The address
+            name (str): The address
 
         Returns:
-            boolean: True if the address is reserved, else False
+            bool: True if the address is reserved, else False
 
         """
 
@@ -136,10 +136,10 @@ class AddressBook(object):
 
     @classmethod
     def load_yaml(cls, db):
-        """Load the addressbook data from the database
+        """Load the addressbook from the database
 
         Args:
-            db (string): The addressbook database
+            db (str): The addressbook database
 
         Returns:
             AddressBook: An instance of the AddressBook class
@@ -184,9 +184,9 @@ class AddressBook(object):
         """Add a new address
 
         Args:
-            name (string): The address name
-            address (string): The address entry
-            init (boolean): If True, it disables any dependencies checks.
+            name (str): The address name
+            address (str): The address entry
+            init (bool): If True, it disables any dependencies checks.
 
         Raises:
             AddressExists, AddressNotValid
@@ -228,8 +228,8 @@ class AddressBook(object):
         """Update an existing address
 
         Args:
-            name (string): The address name
-            address (string): The updated address entry
+            name (str): The address name
+            address (str): The updated address entry
 
         Raises:
             AddressNotFound, AddressNotValid, AddressNotUpdated
@@ -279,7 +279,7 @@ class AddressBook(object):
         """Delete an address
 
         Args:
-            name (string): The address name
+            name (str): The address name
 
         Raises:
             AddressNotFound, AddressInUse, AddressNotValid
@@ -310,8 +310,8 @@ class AddressBook(object):
         """Look up an address
 
         Args:
-            name (string): The address
-            recurse (boolean): Enable recursive lookup
+            name (str): The address
+            recurse (bool): Enable recursive lookup
 
         Returns:
             list: The looked up address entry
@@ -349,10 +349,10 @@ class AddressBook(object):
         """Returns whether an address exists or not
 
         Args:
-            name (string): The address
+            name (str): The address
 
         Returns:
-            boolean: True if the address exists, else False
+            bool: True if the address exists, else False
 
         """
 
@@ -367,8 +367,8 @@ class AddressBook(object):
         """Add a rule dependency to the given address entry
 
         Args:
-            address (string): The address name
-            rule (string): The rule name
+            address (str): The address name
+            rule (str): The rule name
 
         Raises:
             AddressNotFound
@@ -385,8 +385,8 @@ class AddressBook(object):
         """Delete a rule dependency for the given address entry
 
         Args:
-            address (string): The address name
-            rule (string): The rule name
+            address (str): The address name
+            rule (str): The rule name
 
         Raises:
             AddressNotFound

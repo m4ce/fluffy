@@ -45,7 +45,7 @@ class Chains(object):
                     self.add(name, table)
 
         self._db = db
-        """dict: The chains database location"""
+        """string: The chains database location"""
 
     def __iter__(self):
         """Retrieve the chains
@@ -61,7 +61,7 @@ class Chains(object):
         """Update the chains
 
         Args:
-            obj (Chains): The updated chains
+            obj (Chains): The updated object
 
         """
 
@@ -97,7 +97,7 @@ class Chains(object):
             table (string): The name of the routing table
 
         Returns:
-            boolean: True if the chain is built-in, else False
+            bool: True if the chain is built-in, else False
 
         """
 
@@ -105,7 +105,7 @@ class Chains(object):
 
     @classmethod
     def load_yaml(cls, db):
-        """Load the chains configuration from the database
+        """Load the chains from the database
 
         Args:
             db (string): The chains database
@@ -290,7 +290,7 @@ class Chains(object):
             table (string): The table name
 
         Returns:
-            boolean: True if the chain exists, else False
+            bool: True if the chain exists, else False
 
         Raises:
             ChainNotFound

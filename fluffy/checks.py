@@ -30,7 +30,7 @@ class Checks(object):
 
         Args:
             checks (dict): A dictionary describing the checks
-            db (string): Location to the checks database
+            db (str): Location to the checks database
 
         """
 
@@ -41,13 +41,13 @@ class Checks(object):
             self.add(name,  **check)
 
         self._db = db
-        """string: The checks database location"""
+        """str: The checks database location"""
 
     def __getitem__(self, key):
         """Retrieve a check
 
         Args:
-            key (string): The check name
+            key (str): The check name
 
         """
 
@@ -67,7 +67,7 @@ class Checks(object):
         """Update the checks
 
         Args:
-            obj (Checks): The updated checks
+            obj (Checks): The updated object
 
         """
 
@@ -96,10 +96,10 @@ class Checks(object):
 
     @classmethod
     def load_yaml(cls, db):
-        """Load the checks configuration from the database
+        """Load the checks from the database
 
         Args:
-            db (string): The checks database
+            db (str): The checks database
 
         Returns:
             Checks: An instance of the Checks class
@@ -144,7 +144,7 @@ class Checks(object):
         """Add a new check
 
         Args:
-            name (string): The check name
+            name (str): The check name
             **kwargs: Arbitrary keywords arguments
 
         Raises:
@@ -176,7 +176,7 @@ class Checks(object):
         """Update a check
 
         Args:
-            name (string): The check name
+            name (str): The check name
             **kwargs: Arbitrary keywords arguments
 
         """
@@ -203,7 +203,7 @@ class Checks(object):
         """Delete a check
 
         Args:
-            name (string): The check name
+            name (str): The check name
 
         Raises:
             CheckNotFound
@@ -219,7 +219,7 @@ class Checks(object):
         """Look up a check
 
         Args:
-            name (string): The check name
+            name (str): The check name
 
         Returns:
             dict: The looked up check entry
@@ -238,10 +238,10 @@ class Checks(object):
         """Returns whether a check exists or not
 
         Args:
-            name (string): The check name
+            name (str): The check name
 
         Returns:
-            boolean: True if the check exists, else False
+            bool: True if the check exists, else False
 
         Raises:
             CheckNotFound

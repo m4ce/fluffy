@@ -17,6 +17,8 @@ from .utils import *
 
 
 class Rules(object):
+    """This class implements the Fluffy rules"""
+
     defaults = {
         'table': 'filter',
         'chain': None,
@@ -59,39 +61,111 @@ class Rules(object):
         'log_level': None,
         'comment': None
     }
+    """dict: Default rule configuration"""
 
     def __init__(self, rules, db, addressbook=None, interfaces=None, chains=None, services=None):
+        """Initialize an instance of the Rules class
+
+        Args:
+            services (dict): A dictionary describing the rules
+            db (str): Location to the rules database
+
+        """
+
         self.addressbook = addressbook
+        """AddressBook: Reference to the addressbook"""
+
         self.interfaces = interfaces
+        """Interfaces: Reference to the interfaces"""
+
         self.chains = chains
+        """Chains: Reference to the chains"""
+
         self.services = services
+        """Services: Reference to the services"""
 
         self._rules = {}
+        """dict: The rule entries"""
+
         self._rules_with_index = []
+        """list: Keep track of rules order"""
+
         for name, rule in rules.iteritems():
             self.add(name=name, index=None, **rule)
 
         self._db = db
+        """str: The rules database location"""
 
     def __getitem__(self, key):
+        """Retrieve a rule
+
+        Args:
+            key (str): The rule to lookup
+
+        Returns:
+            dict: The looked up rule
+
+        """
+
         return self.lookup(key)
 
     def __iter__(self):
+        """Retrieve all rules
+
+        Returns:
+            iterator: The rules
+
+        """
+
         for index, name in enumerate(self._rules_with_index):
             yield name, dict(self._rules[name].items() + {'index': index}.items())
 
     def update_objref(self, obj):
+        """Update the rules
+
+        Args:
+            obj (Rules): The rules object
+
+        """
+
         self._rules = obj.rules()
         self._rules_with_index = obj.rules_with_index()
 
     def rules(self):
+        """Retrieve the rules as a dictionary
+
+        Returns:
+            dict: The rules
+
+        """
+
         return self._rules
 
     def rules_with_index(self):
+        """Retrieve the rules as a list
+
+        Returns:
+            list: The rules
+
+        """
+
         return self._rules_with_index
 
     @classmethod
     def load_yaml(cls, db, addressbook, interfaces, chains, services):
+        """Load the rules from the database
+
+        Args:
+            db (str): The rules database
+
+        Returns:
+            Services: An instance of the Rules class
+
+        Raises:
+            RuntimeError
+
+        """
+
         rules = {}
 
         if os.path.exists(db):
@@ -105,6 +179,8 @@ class Rules(object):
         return cls(rules=rules, db=db, addressbook=addressbook, interfaces=interfaces, chains=chains, services=services)
 
     def save(self):
+        """Persist the rules to disk"""
+
         try:
             logger.debug("Backing up rules")
             if os.path.exists(self._db):
@@ -122,6 +198,13 @@ class Rules(object):
             logger.exception("Failed to save rules")
 
     def validate(self, rule):
+        """Validate a rule configuration
+
+        Args:
+            rule (dict): The rule configuration
+
+        """
+
         if (rule['action'] == None and rule['jump'] == None) or (rule['action'] and rule['jump']):
             raise Exception("Either action or jump are required")
 
@@ -304,6 +387,18 @@ class Rules(object):
                     "Rule parameter '{}' must be type bool".format(k))
 
     def add(self, name, index=None, **kwargs):
+        """Add a new rule
+
+        Args:
+            name (str): The rule name
+            index (Optional[int]): The rule index
+            **kwargs: Arbitrary keyword arguments
+
+        Raises:
+            RuleExists, RuleNotValid
+
+        """
+
         if self.exists(name):
             raise RuleExists("Rule already exists")
 
@@ -369,6 +464,18 @@ class Rules(object):
                     self.services.add_dep(service=srv, rule=name)
 
     def update(self, name, index=None, **kwargs):
+        """Update a rule
+
+        Args:
+            name (str): The rule name
+            index (Optional[int]): The rule index
+            **kwargs: Arbitrary keyword arguments
+
+        Raises:
+            RuleNotFound, RuleNotValid, RuleNotUpdated
+
+        """
+
         if not self.exists(name):
             raise RuleNotFound("Rule not found")
 
@@ -424,6 +531,16 @@ class Rules(object):
             self._rules[name].update(rule)
 
     def delete(self, name):
+        """Delete a rule
+
+        Args:
+            name (string): The rule name
+
+        Raises:
+            RuleNotFound, RuleInUse, RuleNotValid
+
+        """
+
         if not self.exists(name):
             raise RuleNotFound("Rule not found")
 
@@ -447,6 +564,16 @@ class Rules(object):
         del self._rules[name]
 
     def exists(self, name):
+        """Returns whether a rule exists or not
+
+        Args:
+            name (string): The rule
+
+        Returns:
+            bool: True if the rule exists, else False
+
+        """
+
         try:
             self.lookup(name)
         except RuleNotFound:
@@ -455,6 +582,19 @@ class Rules(object):
         return True
 
     def lookup(self, name):
+        """Look up a rule
+
+        Args:
+            name (string): The rule
+
+        Returns:
+            dict: The looked up rule entry
+
+        Raises:
+            RuleNotFound
+
+        """
+
         try:
             return self._rules[name]
         except KeyError:
