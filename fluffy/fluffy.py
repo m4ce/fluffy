@@ -21,18 +21,32 @@ class Fluffy(object):
     def __init__(self, data_dir, max_sessions):
         self.addressbook = AddressBook.load_yaml(
             db=os.path.join(data_dir, 'addressbook.db'))
+        """AddressBook: Reference to the active addressbook"""
+
         self.interfaces = Interfaces.load_yaml(
             db=os.path.join(data_dir, 'interfaces.db'))
+        """Interfaces: Reference to the active interfaces"""
+
         self.chains = Chains.load_yaml(db=os.path.join(data_dir, 'chains.db'))
+        """Chains: Reference to the active chains"""
+
         self.services = Services.load_yaml(
             db=os.path.join(data_dir, 'services.db'))
+        """Services: Reference to the active services"""
+
         self.checks = Checks.load_yaml(
             db=os.path.join(data_dir, 'checks.db'))
+        """Checks: Reference to the active checks"""
+
         self.rules = Rules.load_yaml(db=os.path.join(data_dir, 'rules.db'), addressbook=self.addressbook,
                                      interfaces=self.interfaces, chains=self.chains, services=self.services)
+        """Rules: Reference to the active rules"""
 
         self._data_dir = data_dir
+        """str: Data directory location"""
+
         self._max_sessions = max_sessions
+        """int: Maximum number of concurrent sessions allowed"""
 
         # create data directory
         if not os.path.exists(self._data_dir):
@@ -46,6 +60,7 @@ class Fluffy(object):
         # configuration sessions
         self.sessions = Sessions(rules=self.rules, checks=self.checks, data_dir=self._data_dir,
                                  max_sessions=self._max_sessions)
+        """Sessions: Reference to the active sessions"""
 
         # persist data every 5m
         logger.debug("Scheduling configuration flush timer")
@@ -62,6 +77,15 @@ class Fluffy(object):
 
     @classmethod
     def load_yaml(cls, config_file):
+        """Load the configuration from a configuration file
+
+        Args:
+            config_file (str): Path to the configuration file
+
+        Returns:
+            Fluffy: An instance of the Fluffy class
+        """
+
         config_dir = os.path.dirname(config_file)
 
         config = {
@@ -79,6 +103,8 @@ class Fluffy(object):
         return cls(**config)
 
     def load(self):
+        """Load the rules on start-up"""
+
         try:
             session = self.sessions.add(name='startup')
             if session.test():
@@ -92,6 +118,8 @@ class Fluffy(object):
             sys.exit(1)
 
     def flush(self):
+        """Flush the configuration"""
+
         with self._flush_lock:
             self.addressbook.save()
             self.interfaces.save()

@@ -20,6 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 global_commit_lock = Lock()
+"""Lock: global lock for committing session configuration to active"""
 
 
 class Sessions(object):
@@ -229,85 +230,186 @@ class Sessions(object):
 
 class Session(object):
     def __init__(self, name, rules, checks, sessions_dir, templates_dir, owner, ttl, executor):
-        # this contains the reference to the active configuration
-        self.name = name
+        self._name = name
+        """str: The session name"""
+
         self._active_rules = rules
+        """Rules: Reference to the active rules"""
+
         self._active_chains = rules.chains
+        """Chains: Reference to the active chains"""
+
         self._active_addressbook = rules.addressbook
+        """AddressBook: Reference to the active addressbook"""
+
         self._active_interfaces = rules.interfaces
+        """Interfaces: Reference to the active interfaces"""
+
         self._active_services = rules.services
+        """Services: Reference to the active services"""
+
         self._active_checks = checks
+        """Checks: Reference to the active checks"""
 
         self._sessions_dir = sessions_dir
-        self._templates_dir = templates_dir
+        """str: The sessions directory"""
 
-        # this is a copy of the active configuration at the start of the
-        # session
+        self._templates_dir = templates_dir
+        """str: The templates directory"""
+
         self._current = copy.deepcopy(rules)
+        """Rules: Copy of the active rules at the start of the session"""
+
         self._current_rules = self._current
+        """Rules: Reference to the active rules at the start of the session"""
+
         self._current_chains = self._current.chains
+        """Chains: Reference to the active chains at the start of the session"""
+
         self._current_addressbook = self._current.addressbook
+        """AddressBook: Reference to the active addresbook at the start of the session"""
+
         self._current_interfaces = self._current.interfaces
+        """Interfaces: Reference to the active interfaces at the start of the session"""
+
         self._current_services = self._current.services
+        """Services: Reference to the active services at the start of the session"""
+
         self._current_checks = copy.deepcopy(checks)
+        """Checks: Reference to the active checks at the start of the session"""
 
         # this will be the session configuration
         self.rules = copy.deepcopy(self._current)
+        """Rules: The session rules"""
+
         self.addressbook = self.rules.addressbook
+        """AddressBook: The session addressbook"""
+
         self.chains = self.rules.chains
+        """Chains: The session chains"""
+
         self.interfaces = self.rules.interfaces
+        """Interfaces: The session interfaces"""
+
         self.services = self.rules.services
+        """Services: The session services"""
+
         self.checks = copy.deepcopy(self._current_checks)
+        """Checks: The session checks"""
 
         self._status = None
         self._commit_job = None
-        #self._commit_thr = None
+
         self._committed = False
+        """bool: Whether the session configuration has been committed or not"""
+
         self._confirmed = False
+        """bool: Whether the session configuration has been confirmed or not"""
+
         self._rollback_timer = None
+        """Timer: The rollback timer"""
+
         self._rollback_timer_start = None
+        """datetime: The rollback timer start time"""
+
         self._owner = owner
+        """str: The session owner"""
+
         self._ttl = ttl
+        """int: The session TTL"""
+
         self._executor = executor
+        """ThreadPoolExecutor: The executor service"""
 
         self._rollback_cancel_lock = Lock()
+        """Lock: The session rollback cancel timer lock"""
+
         self._confirm_lock = Lock()
+        """Lock: The session confirm lock"""
 
         atexit.register(self.close)
 
+    def name(self):
+        """Returns the session's name
+
+        Returns:
+            str: The session's name
+
+        """
+
+        return self._name
+
     def owner(self):
+        """Returns the session's owner
+
+        Returns:
+            str: The session's owner
+
+        """
+
         return self._owner
 
     def ttl(self):
+        """Returns the session's TTL
+
+        Returns:
+            int: The session's TTL
+
+        """
+
         return self._ttl
 
     def committed(self):
+        """Returns whether the session's configuration has been committed or not
+
+        Returns:
+            bool: True if the session's configuration has been committed, else False
+
+        """
+
         return self._committed
 
     def confirmed(self):
+        """Returns whether the session's configuration has been confirmed or not
+
+        Returns:
+            bool: True if the session's configuration has been confirmed, else False
+
+        """
+
         return self._confirmed
 
-    def commit_in_progress(self):
+    def _commit_in_progress(self):
         if self._commit_job:
             return self._commit_job.running()
             # return self._commit_thr.isAlive()
 
         return False
 
-    def rollback_in_progress(self):
+    def _rollback_in_progress(self):
         return True if self._rollback_timer else False
 
-    def rollback_seconds_left(self):
+    def _rollback_seconds_left(self):
         if self._rollback_timer_start:
-            # calculate how many seconds we have to go
             return (self._rollback_timer_start - datetime.now()).seconds
 
         return None
 
-    def build(self):
-        return self._build(chains=self.chains, interfaces=self.interfaces, addressbook=self.addressbook, rules=self.rules, services=self.services)
+    def build(self, chains, interfaces, addressbook, rules, services):
+        """Build IPTables rules from the session's configuration
 
-    def _build(self, chains, interfaces, addressbook, rules, services):
+        Args:
+            chains (Chains): The chains
+            interfaces (Interfaces): The interfaces
+            addressbook (AddressBook): The interfaces
+            rules (Rules): The rules
+            services (Services): The services
+
+        Returns:
+            list: IPTables firewall rules
+
+        """
+
         ret = []
 
         j2env = Environment(loader=FileSystemLoader(
@@ -376,7 +478,15 @@ class Session(object):
         return ret
 
     def test(self):
-        rules = self.build()
+        """Test IPTables firewall rules
+
+        Returns:
+            (bool, Optional[str]): A tuple with the first object being True if the test succeeded, else False. The second object is a string storing an optional error message.
+
+        """
+
+        rules = self.build(chains=self.chains, interfaces=self.interfaces,
+                           addressbook=self.addressbook, rules=self.rules, services=self.services)
         tmpfile = tempfile.NamedTemporaryFile(
             dir=self._sessions_dir, prefix='test_', delete=False)
         tmpfile.write("\n".join(rules))
@@ -414,6 +524,8 @@ class Session(object):
             self._rollback_timer_start = None
 
     def rollback(self):
+        """Rollback configuration"""
+
         with self._confirm_lock:
             if self.confirmed():
                 raise SessionError(
@@ -421,17 +533,27 @@ class Session(object):
 
             logger.warning(
                 "Rolling back configuration in session {}".format(self.name))
-            rules = self._build(chains=self._active_chains, interfaces=self._active_interfaces,
-                                addressbook=self._active_addressbook, rules=self._active_rules, services=self._active_services)
+            rules = self.build(chains=self._active_chains, interfaces=self._active_interfaces,
+                               addressbook=self._active_addressbook, rules=self._active_rules, services=self._active_services)
             self._load(rules)
             self._committed = False
             self._status = "Configuration not confirmed - rolled back"
 
         # cancel the rollback timer - just in case
-        if self.rollback_in_progress():
+        if self._rollback_in_progress():
             self._cancel_rollback()
 
     def _load(self, rules):
+        """Load IPTables rules
+
+        Args:
+            list: IPTables rules
+
+        Returns:
+            (int, Optional[str]): A tuple where the first object is the return code and the second is an optional error string associated to the return code.
+
+        """
+
         tmpfile = tempfile.NamedTemporaryFile(
             dir=self._sessions_dir, delete=False)
         tmpfile.write("\n".join(rules))
@@ -444,14 +566,15 @@ class Session(object):
 
         return proc.returncode, err
 
-    def has_active_configuration_changed(self):
+    def _has_active_configuration_changed(self):
         return (dict(self._current_addressbook) != dict(self._active_addressbook) or dict(self._current_interfaces) != dict(self._active_interfaces) or dict(self._current_chains) != dict(self._active_chains) or dict(self._current_services) != dict(self._active_services) or OrderedDict(self._current_rules) != OrderedDict(self._active_rules))
 
     def _commit(self, rules, force, rollback, rollback_interval):
         if not force:
             ok, err = self.test()
             if ok:
-                logger.info("Configuration tested successfully in session {}".format(self.name))
+                logger.info(
+                    "Configuration tested successfully in session {}".format(self.name))
             else:
                 raise SessionCommitError(
                     "Configuration test failure (Error: {})".format(err))
@@ -466,7 +589,7 @@ class Session(object):
             self._status = 'Configuration commit in progress (lock acquired)'
 
             # has the initial session configuration shifted from the active?
-            if self.has_active_configuration_changed():
+            if self._has_active_configuration_changed():
                 raise SessionCommitError(
                     "The active configuration appears to have changed since the start of the session. Commit aborted.")
 
@@ -514,6 +637,8 @@ class Session(object):
             "Global commit lock released in session {}".format(self.name))
 
     def confirm(self):
+        """Confirm configuration"""
+
         if self.confirmed():
             raise SessionError("Configuration already confirmed")
 
@@ -544,7 +669,7 @@ class Session(object):
                     "Configuration confirmed in session {}".format(self.name))
 
                 # cancel rollback timer if active
-                if self.rollback_in_progress():
+                if self._rollback_in_progress():
                     self._cancel_rollback()
 
                 # set status
@@ -562,20 +687,31 @@ class Session(object):
                 "Failed to commit configuration in session {} - {}".format(self.name, e.message))
 
     def commit(self, force=False, async=False, rollback=True, rollback_interval=60):
+        """Commit configuration
+
+        Args:
+            force (bool): Force commit even though no changes have been made
+            async (bool): Perform commit asynchronously
+            rollback (bool): Enable rollback in case of errors
+            rollback_interval (int): Rollback configuration after the given internal unless confirmed
+
+        """
+
         if self.confirmed():
             raise SessionError("Configuration already committed and confirmed")
 
         if self.committed():
             raise SessionError("Configuration already committed")
 
-        if self.commit_in_progress():
+        if self._commit_in_progress():
             raise SessionError("Configuration commit already in progress")
 
         if not force:
             if dict(self._current_addressbook) == dict(self.addressbook) and dict(self._current_interfaces) == dict(self.interfaces) and dict(self._current_chains) == dict(self.chains) and dict(self._current_services) == dict(self.services) and OrderedDict(self._current_rules) == OrderedDict(self.rules):
                 raise SessionError("No configuration changes detected")
 
-        rules = self.build()
+        rules = self.build(chains=self.chains, interfaces=self.interfaces,
+                           addressbook=self.addressbook, rules=self.rules, services=self.services)
         if async:
             self.__commit_job = self._executor.submit(
                 self._async_commit, **{'rules': rules, 'force': force, 'rollback': rollback, 'rollback_interval': rollback_interval})
@@ -584,6 +720,13 @@ class Session(object):
                          rollback_interval=rollback_interval)
 
     def status(self):
+        """Provide information about the active session
+
+        Returns:
+            info (dict): Information about the running session
+
+        """
+
         info = {}
         info['owner'] = self.owner()
         info['ttl'] = self.ttl()
@@ -592,23 +735,20 @@ class Session(object):
 
         if self.rollback_in_progress():
             info['status'] = "Configuration committed - rollback will take place in {}s unless configuration is confirmed".format(
-                self.rollback_seconds_left())
+                self._rollback_seconds_left())
         else:
             info['status'] = self._status
 
         return info
 
-    # FIXME: dictdiffer does not support OrderedDict (see https://github.com/inveniosoftware/dictdiffer/issues/94)
-    # def merge(self):
-    #  d1 = dictutils.diff(OrderedDict(self._current_rules.all()), OrderedDict(self.rules.all()))
-    #  p1 = dictutils.patch(d1, OrderedDict(self._active_rules.all()))
-
     def close(self):
+        """Close session"""
+
         # cancel any outstanding rollback timer
         if self.rollback_in_progress():
             self._cancel_rollback()
 
-        if self.commit_in_progress():
+        if self._commit_in_progress():
             logger.info(
                 "Waiting for commit process to finish in session {}".format(self.name))
             # self._commit_thr.join()
