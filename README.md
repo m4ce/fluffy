@@ -14,7 +14,7 @@ Fluffy is a firewall as a service solution that primarily targets Linux environm
 
 ## Puppet integration
 
-There is a Puppet module available on the [PuppetForge](https://forge.puppet.com/m4ce/fluffy).
+A module is available on [PuppetForge](https://forge.puppet.com/m4ce/fluffy).
 
 ## Running in Docker
 
