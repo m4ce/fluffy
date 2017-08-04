@@ -225,13 +225,42 @@ class Rules(object):
             if not self.chains.exists(name=rule['jump'], table=rule['table']):
                 raise Exception("Rule jump does not match any chains")
 
-        # Rule protocol
-        if rule['protocol'] and rule['protocol'] not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']:
-            raise Exception("Invalid rule protocol")
+        # Check if we have valid services
+        if rule['protocol'] and (rule['src_service'] or rule['dst_service']):
+            raise Exception(
+                "Protocol and src_service/dst_service cannot be used together")
+
+        protocol = None
+        if rule['protocol']:
+            if rule['protocol'] not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']:
+                raise Exception("Invalid rule protocol")
+
+            protocol = rule['protocol']
+        else:
+            for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
+                if rule[attr_key[0]]:
+                    for srv in rule[attr_key[0]]:
+                        if not self.services.exists(srv):
+                            raise Exception(
+                                "Service '{}' not found in services list".format(srv))
+
+                        # check if protocol is consistent
+                        data_lookup = self.services.lookup(srv)
+
+                        if not data_lookup[attr_key[1]]:
+                            raise Exception(
+                                "Service '{}' has no {} defined".format(srv, attr_key[1]))
+
+                        if protocol:
+                            if protocol != data_lookup['protocol']:
+                                raise Exception(
+                                    "Cannot mix services which have different protocols together")
+                        else:
+                            protocol = data_lookup['protocol']
 
         # ICMP options
         if rule['icmp_type']:
-            if rule['protocol'] != 'icmp':
+            if protocol != 'icmp':
                 raise Exception(
                     "Rule protocol must be set to 'icmp' when using ICMP parameters")
 
@@ -240,7 +269,7 @@ class Rules(object):
 
         # TCP options
         if rule['tcp_flags']:
-            if rule['protocol'] != 'tcp':
+            if protocol != 'tcp':
                 raise Exception(
                     "Rule protocol must be set to 'tcp' when using TCP options")
 
@@ -280,33 +309,6 @@ class Rules(object):
                             if not is_valid_iprange(v):
                                 raise Exception(
                                     "Address '{}' is not a valid IP range".format(addr))
-
-        # Check if we have valid services
-        if rule['protocol'] and (rule['src_service'] or rule['dst_service']):
-            raise Exception(
-                "Protocol and src_service/dst_service cannot be used together")
-
-        service_protocol = None
-        for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
-            if rule[attr_key[0]]:
-                for srv in rule[attr_key[0]]:
-                    if not self.services.exists(srv):
-                        raise Exception(
-                            "Service '{}' not found in services list".format(srv))
-
-                    # check if protocol is consistent
-                    data_lookup = self.services.lookup(srv)
-
-                    if not data_lookup[attr_key[1]]:
-                        raise Exception(
-                            "Service '{}' has no {} defined".format(srv, attr_key[1]))
-
-                    if service_protocol:
-                        if service_protocol != data_lookup['protocol']:
-                            raise Exception(
-                                "Cannot mix services which have different protocols together")
-                    else:
-                        service_protocol = data_lookup['protocol']
 
         if rule['in_interface'] and rule['out_interface'] and self.interfaces.lookup(rule['in_interface']) and self.interfaces.lookup(rule['out_interface']) and rule['in_interface'] == rule['out_interface']:
             raise Exception(
