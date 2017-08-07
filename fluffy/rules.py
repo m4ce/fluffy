@@ -451,11 +451,12 @@ class Rules(object):
 
         # The following options must be treated as lists
         for attr_key in ['ctstate', 'state', 'in_interface', 'out_interface', 'src_address_range', 'dst_address_range', 'src_address', 'dst_address', 'src_service', 'dst_service']:
-            if rule[attr_key]:
-                if not isinstance(rule[attr_key], list):
-                    rule[attr_key] = [rule[attr_key]]
+            # convert to list
+            if not isinstance(rule[attr_key], list):
+                rule[attr_key] = [rule[attr_key]]
 
-                rule[attr_key] = list(set([str(i) for i in rule[attr_key]]))
+            # unique elements and convert them to strings
+            rule[attr_key] = list(set([str(i) for i in rule[attr_key]]))
 
         # Check if we have valid services
         if rule['protocol'] and (rule['src_service'] or rule['dst_service']):
