@@ -291,6 +291,13 @@ class Rules(object):
 
         # manage dependencies here
         if self._rules[name] != rule:
+            for attr_key in ['in_interface', 'out_interface']:
+                for interface in list(set(self._rules[name][attr_key]) - set(rule[attr_key])):
+                    self.interfaces.delete_dep(interface=interface, rule=name)
+
+                for interface in list(set(rule[attr_key]) - set(self._rules[name][attr_key])):
+                    self.interfaces.add_dep(interface=interface, rule=name)
+
             for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
                 for addr in list(set(self._rules[name][attr_key]) - set(rule[attr_key])):
                     self.addressbook.delete_dep(address=addr, rule=name)
@@ -329,6 +336,10 @@ class Rules(object):
             raise RuleNotFound("Rule not found")
 
         # manage dependencies here
+        for attr_key in ['in_interface', 'out_interface']:
+            for interface in self._rules[name][attr_key]:
+                self.interfaces.delete_dep(interface=interface, rule=name)
+
         for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
             if self._rules[name][attr_key]:
                 for addr in self._rules[name][attr_key]:
@@ -340,9 +351,8 @@ class Rules(object):
                     table=self._rules[name]['table'], chain=self._rules[name][attr_key], rule=name)
 
         for attr_key in ['src_service', 'dst_service']:
-            if self._rules[name][attr_key]:
-                for srv in self._rules[name][attr_key]:
-                    self.services.delete_dep(service=srv, rule=name)
+            for service in self._rules[name][attr_key]:
+                self.services.delete_dep(service=service, rule=name)
 
         self._rules_with_index.remove(name)
         del self._rules[name]
