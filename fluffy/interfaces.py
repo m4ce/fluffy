@@ -2,6 +2,7 @@ import os
 import yaml
 import logging
 import shutil
+from pyroute2 import IPRoute
 logger = logging.getLogger(__name__)
 
 from .exceptions import *
@@ -113,12 +114,19 @@ class Interfaces(object):
         except Exception as e:
             logger.exception("Failed to save interfaces")
 
-    def validate(self, interface):
-        if netif in self._interfaces.values():
-            raise Exception("Network interface '{}' already in use".format(netif))
+    def validate(self, name, interface):
+        if interface in self._interfaces.values():
+            raise Exception("Network interface already in use".format(interface))
 
-        if not isinstance(interface, basestring):
-            raise Exception("Network interface must be type string")
+        if not self.is_reserved(name):
+            if not isinstance(interface, basestring):
+                raise Exception("Network interface must be type string")
+
+            # check that the network interface actually exists on the system
+            ip = IPRoute()
+            if not ip.link_lookup(ifname=interface):
+                raise Exception("Network interface not found on the system")
+            ip.close()
 
     def add(self, name, interface):
         """Add a new interface
@@ -136,7 +144,7 @@ class Interfaces(object):
             raise InterfaceExists("Interface name already exists")
 
         try:
-            self.validate(interface)
+            self.validate(name, interface)
         except Exception as e:
             raise InterfaceNotValid(e.message)
 
@@ -163,7 +171,7 @@ class Interfaces(object):
                 "Interface cannot be altered as it is reserved")
 
         try:
-            self.validate(interface)
+            self.validate(name, interface)
         except Exception as e:
             raise InterfaceNotValid(e.message)
 

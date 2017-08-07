@@ -28,6 +28,7 @@ setup(
         'Flask-API',
         'subprocess32',
         'futures',
+        'pyroute2',
         'python-unshare'
     ],
     classifiers=[
