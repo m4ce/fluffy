@@ -472,17 +472,17 @@ class Rules(object):
         else:
             for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
                 if rule[attr_key[0]]:
-                    for srv in rule[attr_key[0]]:
-                        if not self.services.exists(srv):
+                    for service in rule[attr_key[0]]:
+                        if not self.services.exists(service):
                             raise Exception(
-                                "Service '{}' not found in services list".format(srv))
+                                "Service '{}' not found in services list".format(service))
 
                         # check if protocol is consistent
-                        data_lookup = self.services.lookup(srv)
+                        data_lookup = self.services.lookup(service)
 
                         if not data_lookup[attr_key[1]]:
                             raise Exception(
-                                "Service '{}' has no {} defined".format(srv, attr_key[1]))
+                                "Service '{}' has no {} defined".format(service, attr_key[1]))
 
                         if protocol:
                             if protocol != data_lookup['protocol']:
@@ -550,20 +550,24 @@ class Rules(object):
 
         # make sure input and output interfaces do not share any interfaces
         if bool((set(rule['in_interface']) - set(['any'])) & (set(rule['out_interface']) - set(['any']))):
-            raise Exception("Input and output interfaces cannot not be the same")
+            raise Exception("Input and output interfaces cannot be the same")
 
         if self.chains.is_builtin(name=rule['chain'], table=rule['table']):
             if rule['in_interface'] and rule['chain'] not in ['INPUT', 'FORWARD', 'PREROUTING']:
                 raise Exception(
                     "Input interface can only be used with INPUT, FORWARD, and PREROUTING built-in chains")
 
+            if not rule['in_interface'] and rule['chain'] in ['INPUT', 'FORWARD', 'PREROUTING']:
+                raise Exception(
+                    "Input interface is required for INPUT, FORWARD, and PREROUTING built-in chains")
+
             if rule['out_interface'] and rule['chain'] not in ['OUTPUT', 'FORWARD', 'POSTROUTING']:
                 raise Exception(
                     "Output interface can only be used with OUTPUT, FORWARD, and POSTROUTING built-in chains")
 
-            if rule['chain'] == 'FORWARD' and (rule['in_interface'] is None or rule['out_interface'] is None):
+            if not rule['out_interface'] and rule['chain'] in ['OUTPUT', 'FORWARD', 'POSTROUTING']:
                 raise Exception(
-                    "Input and output interfaces are required with FORWARD built-in chain")
+                    "Output interface is required for OUTPUT, FORWARD, and POSTROUTING built-in chains")
 
         # ICMP rejection
         if rule['reject_with']:
