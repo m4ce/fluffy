@@ -113,6 +113,13 @@ class Interfaces(object):
         except Exception as e:
             logger.exception("Failed to save interfaces")
 
+    def validate(self, interface):
+        if netif in self._interfaces.values():
+            raise Exception("Network interface '{}' already in use".format(netif))
+
+        if not isinstance(interface, basestring):
+            raise Exception("Network interface must be type string")
+
     def add(self, name, interface):
         """Add a new interface
 
@@ -128,9 +135,10 @@ class Interfaces(object):
         if self.exists(name):
             raise InterfaceExists("Interface name already exists")
 
-        # Check if the network interface is already in use
-        if interface in self._interfaces.values():
-            raise InterfaceNotValid("Interface already in use")
+        try:
+            self.validate(interface)
+        except Exception as e:
+            raise InterfaceNotValid(e.message)
 
         self._interfaces[name] = interface
         self._rule_deps[name] = []
@@ -154,9 +162,10 @@ class Interfaces(object):
             raise InterfaceNotValid(
                 "Interface cannot be altered as it is reserved")
 
-        # Check if the network interface is already in use
-        if interface in self._interfaces.values():
-            raise InterfaceNotValid("Interface already in use")
+        try:
+            self.validate(interface)
+        except Exception as e:
+            raise InterfaceNotValid(e.message)
 
         if self._interface[name] != interface:
             self._interfaces[name] = interface

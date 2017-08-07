@@ -512,17 +512,20 @@ class Rules(object):
 
         # Check if we have valid addresses
         for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
-            if rule[attr_key]:
-                for addr in rule[attr_key]:
-                    if not self.addressbook.exists(addr):
-                        raise Exception(
-                            "Address '{}' not found in addressbook".format(addr))
+            if (attr_key == 'src_address' or attr_key == 'dst_address') and len(rule[attr_key]) > 1 and 'any' in rule[attr_key]:
+                raise Exception("Cannot mix 'any' with other addresses")
 
-                    if attr_key == 'src_address_range' or attr_key == 'dst_address_range':
-                        for v in self.addressbook.lookup(addr, recurse=True):
-                            if not is_valid_iprange(v):
-                                raise Exception(
-                                    "Address '{}' is not a valid IP range".format(addr))
+            for addr in rule[attr_key]:
+                if not self.addressbook.exists(addr):
+                    raise Exception(
+                        "Address '{}' not found in addressbook".format(addr))
+
+                # is it a valid IP Range?
+                if attr_key == 'src_address_range' or attr_key == 'dst_address_range':
+                    for v in self.addressbook.lookup(addr, recurse=True):
+                        if not is_valid_iprange(v):
+                            raise Exception(
+                                "Address '{}' is not a valid IP range".format(addr))
 
         # Check if we have valid interfaces
         for attr_key in ['in_interface', 'out_interface']:
@@ -532,7 +535,7 @@ class Rules(object):
                         "Interface '{}' not found".format(interface))
 
             if len(rule[attr_key]) > 1 and 'any' in rule[attr_key]:
-                raise Exception("Cannot use 'any' with interface names")
+                raise Exception("Cannot mix 'any' with other interfaces")
 
         # make sure input and output interfaces do not share any interfaces
         if bool((set(rule['in_interface']) - set(['any'])) & (set(rule['out_interface']) - set(['any']))):
