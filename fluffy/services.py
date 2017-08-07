@@ -109,47 +109,6 @@ class Services(object):
 
         return self._rule_deps
 
-    @classmethod
-    def is_reserved(cls, name):
-        """Returns whether a service is reserved or not
-
-        Args:
-            name (str): The service
-
-        Returns:
-            bool: True if the service is reserved, else False
-
-        """
-
-        return True if name in cls.reserved_services else False
-
-    @classmethod
-    def load_yaml(cls, db):
-        """Load the services from the database
-
-        Args:
-            db (str): The services database
-
-        Returns:
-            Services: An instance of the Services class
-
-        Raises:
-            RuntimeError
-
-        """
-
-        services = {}
-
-        if os.path.exists(db):
-            try:
-                with open(db, 'r') as stream:
-                    services = yaml.load(stream)
-            except Exception as e:
-                raise RuntimeError(
-                    "Failed to load services ({})".format(e.message))
-
-        return cls(services=services, db=db)
-
     def save(self):
         """Persist the services to disk"""
 
@@ -371,3 +330,44 @@ class Services(object):
 
         if rule in self._rule_deps[service]:
             self._rule_deps[service].remove(rule)
+
+    @classmethod
+    def is_reserved(cls, name):
+        """Returns whether a service is reserved or not
+
+        Args:
+            name (str): The service
+
+        Returns:
+            bool: True if the service is reserved, else False
+
+        """
+
+        return True if name in cls.reserved_services else False
+
+    @classmethod
+    def load_yaml(cls, db):
+        """Load the services from the database
+
+        Args:
+            db (str): The services database
+
+        Returns:
+            Services: An instance of the Services class
+
+        Raises:
+            RuntimeError
+
+        """
+
+        services = {}
+
+        if os.path.exists(db):
+            try:
+                with open(db, 'r') as stream:
+                    services = yaml.load(stream)
+            except Exception as e:
+                raise RuntimeError(
+                    "Failed to load services ({})".format(e.message))
+
+        return cls(services=services, db=db)

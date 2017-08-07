@@ -120,47 +120,6 @@ class AddressBook(object):
             else:
                 yield name, address
 
-    @classmethod
-    def is_reserved(cls, name):
-        """Returns whether an address is reserved or not
-
-        Args:
-            name (str): The address
-
-        Returns:
-            bool: True if the address is reserved, else False
-
-        """
-
-        return True if name in cls.reserved_addresses else False
-
-    @classmethod
-    def load_yaml(cls, db):
-        """Load the addressbook from the database
-
-        Args:
-            db (str): The addressbook database
-
-        Returns:
-            AddressBook: An instance of the AddressBook class
-
-        Raises:
-            RuntimeError
-
-        """
-
-        addressbook = {}
-
-        if os.path.exists(db):
-            try:
-                with open(db, 'r') as stream:
-                    addressbook = yaml.load(stream)
-            except Exception as e:
-                raise RuntimeError(
-                    "Failed to load addressbook ({})".format(e.message))
-
-        return cls(addressbook=addressbook, db=db)
-
     def save(self):
         """Persist the addressbook to disk"""
 
@@ -398,3 +357,44 @@ class AddressBook(object):
 
         if rule in self._rule_deps[address]:
             self._rule_deps[address].remove(rule)
+
+    @classmethod
+    def is_reserved(cls, name):
+        """Returns whether an address is reserved or not
+
+        Args:
+            name (str): The address
+
+        Returns:
+            bool: True if the address is reserved, else False
+
+        """
+
+        return True if name in cls.reserved_addresses else False
+
+    @classmethod
+    def load_yaml(cls, db):
+        """Load the addressbook from the database
+
+        Args:
+            db (str): The addressbook database
+
+        Returns:
+            AddressBook: An instance of the AddressBook class
+
+        Raises:
+            RuntimeError
+
+        """
+
+        addressbook = {}
+
+        if os.path.exists(db):
+            try:
+                with open(db, 'r') as stream:
+                    addressbook = yaml.load(stream)
+            except Exception as e:
+                raise RuntimeError(
+                    "Failed to load addressbook ({})".format(e.message))
+
+        return cls(addressbook=addressbook, db=db)

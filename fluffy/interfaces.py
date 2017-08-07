@@ -94,49 +94,8 @@ class Interfaces(object):
 
         return self._rule_deps
 
-    @classmethod
-    def is_reserved(cls, name):
-        """Returns whether an interface is reserved or not
-
-        Args:
-            name (str): The interface
-
-        Returns:
-            bool: True if the interface is reserved, else False
-
-        """
-
-        return True if name in cls.reserved_interfaces else False
-
-    @classmethod
-    def load_yaml(cls, db):
-        """Load the interfaces from the database
-
-        Args:
-            db (str): The interfaces database
-
-        Returns:
-            Services: An instance of the Interfaces class
-
-        Raises:
-            RuntimeError
-
-        """
-
-        interfaces = {}
-
-        if os.path.exists(db):
-            try:
-                with open(db, 'r') as stream:
-                    interfaces = yaml.load(stream)
-            except Exception as e:
-                raise RuntimeError(
-                    "Failed to load interfaces ({})".format(e.message))
-
-        return cls(interfaces=interfaces, db=db)
-
     def save(self):
-        """Persist the services to disk"""
+        """Persist the interfaces to disk"""
 
         try:
             logger.debug("Backing up interfaces")
@@ -169,6 +128,10 @@ class Interfaces(object):
         if self.exists(name):
             raise InterfaceExists("Interface name already exists")
 
+        # Check if the network interface is already in use
+        if interface in self._interfaces.values():
+            raise InterfaceNotValid("Interface already in use")
+
         self._interfaces[name] = interface
         self._rule_deps[name] = []
 
@@ -190,6 +153,10 @@ class Interfaces(object):
         if self.is_reserved(name):
             raise InterfaceNotValid(
                 "Interface cannot be altered as it is reserved")
+
+        # Check if the network interface is already in use
+        if interface in self._interfaces.values():
+            raise InterfaceNotValid("Interface already in use")
 
         if self._interface[name] != interface:
             self._interfaces[name] = interface
@@ -295,3 +262,44 @@ class Interfaces(object):
 
         if rule in self._rule_deps[interface]:
             self._rule_deps[interface].remove(rule)
+
+    @classmethod
+    def is_reserved(cls, name):
+        """Returns whether an interface is reserved or not
+
+        Args:
+            name (str): The interface
+
+        Returns:
+            bool: True if the interface is reserved, else False
+
+        """
+
+        return True if name in cls.reserved_interfaces else False
+
+    @classmethod
+    def load_yaml(cls, db):
+        """Load the interfaces from the database
+
+        Args:
+            db (str): The interfaces database
+
+        Returns:
+            Interfaces: An instance of the Interfaces class
+
+        Raises:
+            RuntimeError
+
+        """
+
+        interfaces = {}
+
+        if os.path.exists(db):
+            try:
+                with open(db, 'r') as stream:
+                    interfaces = yaml.load(stream)
+            except Exception as e:
+                raise RuntimeError(
+                    "Failed to load interfaces ({})".format(e.message))
+
+        return cls(interfaces=interfaces, db=db)

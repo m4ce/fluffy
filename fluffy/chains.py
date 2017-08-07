@@ -88,48 +88,6 @@ class Chains(object):
 
         return self._rule_deps
 
-    @classmethod
-    def is_builtin(cls, name, table):
-        """Returns whether a chain is built-in or not
-
-        Args:
-            name (str): The name of the chain
-            table (str): The name of the routing table
-
-        Returns:
-            bool: True if the chain is built-in, else False
-
-        """
-
-        return True if name in cls.builtin_chains[table] else False
-
-    @classmethod
-    def load_yaml(cls, db):
-        """Load the chains from the database
-
-        Args:
-            db (str): The chains database
-
-        Returns:
-            Chains: An instance of the Chains class
-
-        Raises:
-            RuntimeError
-
-        """
-
-        tables = {}
-
-        if os.path.exists(db):
-            try:
-                with open(db, 'r') as stream:
-                    tables = yaml.load(stream)
-            except Exception as e:
-                raise RuntimeError(
-                    "Failed to load tables ({})".format(e.message))
-
-        return cls(tables=tables, db=db)
-
     def save(self):
         """Persist the chains to disk"""
 
@@ -213,6 +171,11 @@ class Chains(object):
             ChainNotFound, ChainNotValid, ChainNotUpdated
 
         """
+
+        # make sure chain name is uppercase and packet matching table
+        # lowercase.
+        name = name.upper()
+        table = table.lower()
 
         if not self.exists(name, table):
             raise ChainNotFound("Chain not found")
@@ -341,6 +304,48 @@ class Chains(object):
 
         if rule in self._rule_deps[table][chain]:
             self._rule_deps[table][chain].remove(rule)
+
+    @classmethod
+    def is_builtin(cls, name, table):
+        """Returns whether a chain is built-in or not
+
+        Args:
+            name (str): The name of the chain
+            table (str): The name of the routing table
+
+        Returns:
+            bool: True if the chain is built-in, else False
+
+        """
+
+        return True if name in cls.builtin_chains[table] else False
+
+    @classmethod
+    def load_yaml(cls, db):
+        """Load the chains from the database
+
+        Args:
+            db (str): The chains database
+
+        Returns:
+            Chains: An instance of the Chains class
+
+        Raises:
+            RuntimeError
+
+        """
+
+        tables = {}
+
+        if os.path.exists(db):
+            try:
+                with open(db, 'r') as stream:
+                    tables = yaml.load(stream)
+            except Exception as e:
+                raise RuntimeError(
+                    "Failed to load tables ({})".format(e.message))
+
+        return cls(tables=tables, db=db)
 
     @classmethod
     def validate(cls, name, table, chain):

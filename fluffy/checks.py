@@ -94,33 +94,6 @@ class Checks(object):
         for name, check in self._checks.iteritems():
             yield name, check
 
-    @classmethod
-    def load_yaml(cls, db):
-        """Load the checks from the database
-
-        Args:
-            db (str): The checks database
-
-        Returns:
-            Checks: An instance of the Checks class
-
-        Raises:
-            RuntimeError
-
-        """
-
-        checks = {}
-
-        if os.path.exists(db):
-            try:
-                with open(db, 'r') as stream:
-                    checks = yaml.load(stream)
-            except Exception as e:
-                raise RuntimeError(
-                    "Failed to load checks ({})".format(e.message))
-
-        return cls(checks=checks, db=db)
-
     def save(self):
         """Persist the checks to disk"""
 
@@ -294,6 +267,33 @@ class Checks(object):
                 raise CheckError(e.message)
             finally:
                 sock.close()
+
+    @classmethod
+    def load_yaml(cls, db):
+        """Load the checks from the database
+
+        Args:
+            db (str): The checks database
+
+        Returns:
+            Checks: An instance of the Checks class
+
+        Raises:
+            RuntimeError
+
+        """
+
+        checks = {}
+
+        if os.path.exists(db):
+            try:
+                with open(db, 'r') as stream:
+                    checks = yaml.load(stream)
+            except Exception as e:
+                raise RuntimeError(
+                    "Failed to load checks ({})".format(e.message))
+
+        return cls(checks=checks, db=db)
 
     @classmethod
     def validate(cls, check):

@@ -437,12 +437,34 @@ class Session(object):
                     userdef_chains.append(j2env.get_template('rule.jinja').render({'rule': {
                                           'chain': chain_name, 'table': table_name, 'action': chain['policy'], 'comment': 'default_chain_policy'}}))
 
+        _rules = OrderedDict()
         for name, rule in rules:
-            r = rule.copy()
-            for attr_key in ['in_interface', 'out_interface']:
-                if rule[attr_key]:
-                    r[attr_key] = self.interfaces[rule[attr_key]]
+            # both input and output interfaces, compute combinations
+            if rule['in_interface'] and rule['out_interface']:
+                for in_interface in rule['in_interface']:
+                    for out_interface in rule['out_interface']:
+                        r = rule.copy()
+                        r['in_interface'] = self.interfaces[in_interface]
+                        r['out_interface'] = self.interfaces[out_interface]
+                        _rules[name] = r
+            # only input interfaces
+            elif rule['in_interface']:
+                for in_interface in rule['in_interface']:
+                    r = rule.copy()
+                    r['in_interface'] = self.interfaces[in_interface]
+                    _rules[name] = r
+            # only output interfaces
+            elif rule['out_interface']:
+                for out_interface in rule['out_interface']:
+                    r = rule.copy()
+                    r['out_interface'] = self.interfaces[out_interface]
+                    _rules[name] = r
+            # no interfaces
+            else:
+                _rules[name] = rule
 
+        for name, rule in _rules.iteritems():
+            r = rule.copy()
             for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
                 if rule[attr_key]:
                     r[attr_key] = []
