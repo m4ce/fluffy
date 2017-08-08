@@ -520,7 +520,7 @@ class Rules(object):
         # Conntrack state
         if rule['ctstate']:
             for state in rule['ctstate']:
-                if state not in ['INVALID', 'ESTABLISHED', 'NEW', 'RELATED', 'SNAT', 'DNAT']:
+                if state not in ['INVALID', 'NEW', 'ESTABLISHED', 'RELATED', 'UNTRACKED', 'SNAT', 'DNAT']:
                     raise Exception(
                         "Invalid conntrack state '{}'".format(state))
 
