@@ -279,15 +279,19 @@ class Rules(object):
         except Exception as e:
             raise RuleNotValid(e.message)
 
-        if index and index < 0 or index > len(self._rules_with_index):
-            raise RuleNotValid("Rule index is out of range")
+        if index:
+            if index < 0 or index > len(self._rules_with_index):
+                raise RuleNotValid("Rule index is out of range")
 
-        if self._rules[name] == rule and self._rules_with_index[index] == name:
-            raise RuleNotUpdated("No changes detected")
+            if self.rules[name] == rule and self._rules_with_index[index] == name:
+                raise RuleNotUpdated("No changes detected")
 
-        if self._rules_with_index[index] != name:
-            self._rules_with_index.remove(name)
-            self._rules_with_index.insert(index, name)
+            if self._rules_with_index[index] != name:
+                self._rules_with_index.remove(name)
+                self._rules_with_index.insert(index, name)
+        else:
+            if self._rules[name] == rule:
+                raise RuleNotUpdated("No changes detected")
 
         # manage dependencies here
         if self._rules[name] != rule:
