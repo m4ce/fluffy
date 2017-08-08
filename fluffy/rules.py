@@ -505,8 +505,8 @@ class Rules(object):
                 raise Exception(
                     "Rule protocol must be set to 'icmp' when using ICMP parameters")
 
-            if rule['icmp_type'] not in ['any', 'echo-reply', 'echo-request']:
-                raise Exception("Invalid icmp types detected")
+            if rule['icmp_type'] not in ['any', 'echo-reply', 'destination-unreachable', 'network-unreachable', 'host-unreachable', 'protocol-unreachable', 'port-unreachable', 'fragmentation-needed', 'source-route-failed', 'network-unknown', 'host-unknown', 'network-prohibited', 'host-prohibited', 'TOS-network-unreachable', 'TOS-host-unreachable', 'communication-prohibited', 'host-precedence-violation', 'precedence-cutoff', 'source-quench', 'redirect', 'network-redirect', 'host-redirect', 'TOS-network-redirect', 'TOS-host-redirect', 'echo-request', 'router-advertisement', 'router-solicitation', 'time-exceeded', 'ttl-zero-during-transit', 'ttl-zero-during-reassembly', 'parameter-problem', 'ip-header-bad', 'required-option-missing', 'timestamp-request', 'timestamp-reply', 'address-mask-request', 'address-mask-reply']:
+                raise Exception("Invalid ICMP type")
 
         # TCP options
         if rule['tcp_flags']:
