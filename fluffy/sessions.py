@@ -482,8 +482,8 @@ class Session(object):
                             data_lookup = self.services[value]
                             r[attr_key[0]] += data_lookup[attr_key[1]]
 
-                            if r['protocol'] is None:
-                                r['protocol'] = data_lookup['protocol'] if protocol != 'any' else 'all'
+                            if not r['protocol']:
+                                r['protocol'] = data_lookup['protocol'] if data_lookup['protocol'] != 'any' else 'all'
 
                 p_rules[name] = r
 
