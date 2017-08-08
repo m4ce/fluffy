@@ -20,7 +20,7 @@ class Services(object):
 
     reserved_services = {
         'any': {
-            'protocol': 'all',
+            'protocol': 'any',
             'src_port': '1:65535',
             'dst_port': '1:65535'
         }
@@ -137,8 +137,8 @@ class Services(object):
 
         """
 
-        # Protoool
-        if service['protocol'] not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']:
+        # Protocol
+        if service['protocol'] not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'any']:
             raise Exception("Invalid service protocol")
 
         # Convert to lists and unique elements

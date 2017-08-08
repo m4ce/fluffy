@@ -464,16 +464,17 @@ class Session(object):
             else:
                 i_rules[name] = rule
 
-        # compute protocol combinations
         p_rules = OrderedDict()
         for name, rule in i_rules.iteritems():
-            r = rule.copy()
-
             if rule['protocol']:
+                # compute protocol combinations
                 for protocol in rule['protocol']:
-                    r['protocol'] = protocol
+                    r = rule.copy()
+                    r['protocol'] = protocol if protocol != 'any' else 'all'
+                    p_rules[name] = r
             else:
-                # handle services if present
+                # handle services
+                r = rule.copy()
                 for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
                     if rule[attr_key[0]]:
                         r[attr_key[0]] = []
@@ -482,9 +483,9 @@ class Session(object):
                             r[attr_key[0]] += data_lookup[attr_key[1]]
 
                             if r['protocol'] is None:
-                                r['protocol'] = data_lookup['protocol']
+                                r['protocol'] = data_lookup['protocol'] if protocol != 'any' else 'all'
 
-                p_rules[name] = rule
+                p_rules[name] = r
 
         # compute everything else
         for name, rule in p_rules.iteritems():
