@@ -24,5 +24,11 @@ $ docker pull m4ce/fluffy
 
 The container needs to run in privileged mode (--privileged). Additionally, you will need to make sure the Docker daemon is started with `--iptables=false`.
 
+## Todo
+
+* API docs
+* Integration tests
+* API-key based authentication
+
 ## Author
 Matteo Cerutti - matteo.cerutti@hotmail.co.uk
