@@ -283,7 +283,7 @@ class Rules(object):
             if index < 0 or index > len(self._rules_with_index):
                 raise RuleNotValid("Rule index is out of range")
 
-            if self.rules[name] == rule and self._rules_with_index[index] == name:
+            if self._rules[name] == rule and self._rules_with_index[index] == name:
                 raise RuleNotUpdated("No changes detected")
 
             if self._rules_with_index[index] != name:
