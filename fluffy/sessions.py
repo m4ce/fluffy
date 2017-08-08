@@ -5,6 +5,7 @@ import tempfile
 import subprocess32 as subprocess
 import glob
 import atexit
+import itertools
 from jinja2 import Environment, FileSystemLoader
 from threading import Timer, Thread, Lock
 from multiprocessing import Process, Queue
@@ -437,47 +438,42 @@ class Session(object):
                     userdef_chains.append(j2env.get_template('rule.jinja').render({'rule': {
                                           'chain': chain_name, 'table': table_name, 'action': chain['policy'], 'comment': 'default_chain_policy'}}))
 
-        # compute interfaces
-        i_rules = OrderedDict()
+        # Handle multiple interfaces here
+        rules_s1 = []
         for name, rule in rules:
             # both input and output interfaces
             if rule['in_interface'] and rule['out_interface']:
                 for in_interface in rule['in_interface']:
                     for out_interface in rule['out_interface']:
-                        r = rule.copy()
-                        r['in_interface'] = self.interfaces[in_interface]
-                        r['out_interface'] = self.interfaces[out_interface]
-                        i_rules[name] = r
+                        rules_s1.append(dict(rule.items() + {'name': name, 'in_interface': self.interfaces[in_interface], 'out_interface': self.interfaces[out_interface]}.items()))
             # only input interfaces
             elif rule['in_interface']:
                 for in_interface in rule['in_interface']:
-                    r = rule.copy()
-                    r['in_interface'] = self.interfaces[in_interface]
-                    i_rules[name] = r
+                    rules_s1.append(dict(rule.items() + {'name': name, 'in_interface': self.interfaces[in_interface]}.items()))
             # only output interfaces
             elif rule['out_interface']:
                 for out_interface in rule['out_interface']:
-                    r = rule.copy()
-                    r['out_interface'] = self.interfaces[out_interface]
-                    i_rules[name] = r
+                    rules_s1.append(dict(rule.items() + {'name': name, 'out_interface': self.interfaces[out_interface]}.items()))
             # no interfaces
             else:
-                i_rules[name] = rule
+                rules_s1.append(dict(rule.items() + {'name': name}.items()))
 
-        p_rules = OrderedDict()
-        for name, rule in i_rules.iteritems():
+        # Handle protocols here
+        rules_s2 = []
+        for rule in rules_s1:
             if rule['protocol']:
                 # compute protocol combinations
                 for protocol in rule['protocol']:
-                    r = rule.copy()
-                    r['protocol'] = protocol if protocol != 'any' else 'all'
-                    p_rules[name] = r
+                    rules_s2.append(dict(rule.items() + {'protocol': protocol if protocol != 'any' else 'all'}.items()))
             else:
                 # handle services
-                r = rule.copy()
+                r = {
+                    'protocol': [],
+                    'src_service': [],
+                    'dst_service': []
+                }
                 for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
                     if rule[attr_key[0]]:
-                        r[attr_key[0]] = []
                         for value in rule[attr_key[0]]:
                             data_lookup = self.services[value]
                             r[attr_key[0]] += data_lookup[attr_key[1]]
@@ -485,14 +481,21 @@ class Session(object):
                             if not r['protocol']:
                                 r['protocol'] = data_lookup['protocol'] if data_lookup['protocol'] != 'any' else 'all'
 
-                p_rules[name] = r
+                rules_s2.append(dict(rule.items() + r.items()))
 
-        # compute everything else
-        for name, rule in p_rules.iteritems():
-            r = rule.copy()
-            for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
+        # Look up addresses
+        rules_s3 = []
+        for rule in rules_s2:
+            r = OrderedDict({
+                'src_address': [],
+                'dst_address': [],
+                'src_address_range': [],
+                'dst_address_range': []
+            })
+
+            multiple = False
+            for attr_key in r.keys():
                 if rule[attr_key]:
-                    r[attr_key] = []
                     for value in rule[attr_key]:
                         data_lookup = self.addressbook[value]
                         if isinstance(data_lookup, list):
@@ -500,14 +503,37 @@ class Session(object):
                         else:
                             r[attr_key].append(data_lookup)
 
-            r['comment'] = name
-            if rule['comment']:
-                r['comment'] = "{}: {}".format(name, rule['comment'])
+                    if len(r[attr_key]) > 1:
+                        multiple = True
+
+            # Since iptables does not support negating multiple sources or destinations, we create a rule for each combination of inputs
+            if multiple:
+                keys = []
+                args = []
+
+                for k in r.keys():
+                  if r[k]:
+                    keys.append(k)
+                    args.append(r[k])
+
+                # Generate cartesian product
+                for result in list(itertools.product(*args)):
+                    rr = {}
+                    for index, item in enumerate(result):
+                        rr[keys[index]] = [item]
+
+                    rules_s3.append(dict(rule.items() + rr.items()))
             else:
-                r['comment'] = name
+                rules_s3.append(dict(rule.items() + r.items()))
+
+        for rule in rules_s3:
+            if rule['comment']:
+                comment = "{}: {}".format(rule['name'], rule['comment'])
+            else:
+                comment = rule['name']
 
             ret.append(j2env.get_template('rule.jinja').render(
-                {'name': name, 'rule': r}))
+                {'rule': dict(rule.items() + {'comment': comment}.items())}))
 
         ret += userdef_chains
         ret += builtin_chains
