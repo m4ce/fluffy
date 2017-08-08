@@ -25,7 +25,7 @@ class Rules(object):
         'action': None,
         'jump': None,
         'negate_protocol': False,
-        'protocol': None,
+        'protocol': [],
         'negate_icmp_type': False,
         'icmp_type': None,
         'negate_tcp_flags': False,
@@ -450,12 +450,12 @@ class Rules(object):
                 raise Exception("Rule jump does not match any chains")
 
         # The following options must be treated as lists
-        for attr_key in ['ctstate', 'state', 'in_interface', 'out_interface', 'src_address_range', 'dst_address_range', 'src_address', 'dst_address', 'src_service', 'dst_service']:
-            # convert to list
+        for attr_key in ['protocol', 'ctstate', 'state', 'in_interface', 'out_interface', 'src_address_range', 'dst_address_range', 'src_address', 'dst_address', 'src_service', 'dst_service']:
+            # Convert to list first
             if not isinstance(rule[attr_key], list):
                 rule[attr_key] = [rule[attr_key]]
 
-            # unique elements and convert them to strings
+            # Unique elements and convert them to strings
             rule[attr_key] = list(set([str(i) for i in rule[attr_key]]))
 
         # Check if we have valid services
@@ -463,13 +463,18 @@ class Rules(object):
             raise Exception(
                 "Protocol and src_service/dst_service cannot be used together")
 
-        protocol = None
+        protocol = []
         if rule['protocol']:
-            if rule['protocol'] not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'all']:
-                raise Exception("Invalid rule protocol")
+            if len(rule['protocol']) > 1 and 'any' in rule['protocol']:
+                raise Exception("Cannot mix 'any' with other protocols")
+
+            for proto in rule['protocol']:
+                if proto not in ['ip', 'tcp', 'udp', 'icmp', 'ipv6-icmp', 'esp', 'ah', 'vrrp', 'igmp', 'ipencap', 'ipv4', 'ipv6', 'ospf', 'gre', 'cbt', 'sctp', 'pim', 'any']:
+                    raise Exception("Invalid rule protocol '{}'".format(proto))
 
             protocol = rule['protocol']
         else:
+            service_proto = None
             for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
                 if rule[attr_key[0]]:
                     for service in rule[attr_key[0]]:
@@ -484,16 +489,19 @@ class Rules(object):
                             raise Exception(
                                 "Service '{}' has no {} defined".format(service, attr_key[1]))
 
-                        if protocol:
-                            if protocol != data_lookup['protocol']:
+                        if service_proto:
+                            if service_proto != data_lookup['protocol']:
                                 raise Exception(
                                     "Cannot mix services which have different protocols together")
                         else:
-                            protocol = data_lookup['protocol']
+                            service_proto = data_lookup['protocol']
+
+            if service_proto:
+                protocol = [service_proto]
 
         # ICMP options
         if rule['icmp_type']:
-            if protocol != 'icmp':
+            if len(protocol) != 1 or 'icmp' not in protocol:
                 raise Exception(
                     "Rule protocol must be set to 'icmp' when using ICMP parameters")
 
@@ -502,7 +510,7 @@ class Rules(object):
 
         # TCP options
         if rule['tcp_flags']:
-            if protocol != 'tcp':
+            if len(protocol) != 1 and 'tcp' not in protocol:
                 raise Exception(
                     "Rule protocol must be set to 'tcp' when using TCP options")
 

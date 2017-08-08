@@ -437,33 +437,57 @@ class Session(object):
                     userdef_chains.append(j2env.get_template('rule.jinja').render({'rule': {
                                           'chain': chain_name, 'table': table_name, 'action': chain['policy'], 'comment': 'default_chain_policy'}}))
 
-        _rules = OrderedDict()
+        # compute interfaces
+        i_rules = OrderedDict()
         for name, rule in rules:
-            # both input and output interfaces, compute combinations
+            # both input and output interfaces
             if rule['in_interface'] and rule['out_interface']:
                 for in_interface in rule['in_interface']:
                     for out_interface in rule['out_interface']:
                         r = rule.copy()
                         r['in_interface'] = self.interfaces[in_interface]
                         r['out_interface'] = self.interfaces[out_interface]
-                        _rules[name] = r
+                        i_rules[name] = r
             # only input interfaces
             elif rule['in_interface']:
                 for in_interface in rule['in_interface']:
                     r = rule.copy()
                     r['in_interface'] = self.interfaces[in_interface]
-                    _rules[name] = r
+                    i_rules[name] = r
             # only output interfaces
             elif rule['out_interface']:
                 for out_interface in rule['out_interface']:
                     r = rule.copy()
                     r['out_interface'] = self.interfaces[out_interface]
-                    _rules[name] = r
+                    i_rules[name] = r
             # no interfaces
             else:
-                _rules[name] = rule
+                i_rules[name] = rule
 
-        for name, rule in _rules.iteritems():
+        # compute protocol combinations
+        p_rules = OrderedDict()
+        for name, rule in i_rules.iteritems():
+            r = rule.copy()
+
+            if rule['protocol']:
+                for protocol in rule['protocol']:
+                    r['protocol'] = protocol
+            else:
+                # handle services if present
+                for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
+                    if rule[attr_key[0]]:
+                        r[attr_key[0]] = []
+                        for value in rule[attr_key[0]]:
+                            data_lookup = self.services[value]
+                            r[attr_key[0]] += data_lookup[attr_key[1]]
+
+                            if r['protocol'] is None:
+                                r['protocol'] = data_lookup['protocol']
+
+                p_rules[name] = rule
+
+        # compute everything else
+        for name, rule in p_rules.iteritems():
             r = rule.copy()
             for attr_key in ['src_address_range', 'dst_address_range', 'src_address', 'dst_address']:
                 if rule[attr_key]:
@@ -474,17 +498,6 @@ class Session(object):
                             r[attr_key] += data_lookup
                         else:
                             r[attr_key].append(data_lookup)
-
-            # handle services
-            for attr_key in [('src_service', 'src_port'), ('dst_service', 'dst_port')]:
-                if rule[attr_key[0]]:
-                    r[attr_key[0]] = []
-                    for value in rule[attr_key[0]]:
-                        data_lookup = self.services[value]
-                        r[attr_key[0]] += data_lookup[attr_key[1]]
-
-                        if r['protocol'] is None:
-                            r['protocol'] = data_lookup['protocol']
 
             r['comment'] = name
             if rule['comment']:
