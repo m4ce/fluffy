@@ -216,21 +216,16 @@ class Rules(object):
         else:
             raise RuleNotValid("Rule chain is required")
 
-
         # validate rule
         try:
             self.validate(rule)
         except Exception as e:
             raise RuleNotValid(e.message)
 
-        if index and before_rule and after_rule:
-            raise RuleNotValid("Cannot specify index, before_rule and after_rule parameters together")
-        elif index and before_rule:
-            raise RuleNotValid("Cannot specify index and before_rule parameters together")
-        elif index and after_rule:
-            raise RuleNotValid("Cannot specify index and after_rule parameters together")
+        if index and (before_rule or after_rule):
+            raise RuleNotValid("Cannot specify index and before_rule/after_rule parameters at the same time")
         elif before_rule and after_rule:
-            raise RuleNotValid("Cannot specify before_rule and after_rule parameters together")
+            raise RuleNotValid("Cannot specify before_rule/after_rule parameters at the same time")
 
         if before_rule:
             if not self.exists(before_rule):
@@ -305,14 +300,10 @@ class Rules(object):
         except Exception as e:
             raise RuleNotValid(e.message)
 
-        if index and before_rule and after_rule:
-            raise RuleNotValid("Cannot specify index, before_rule and after_rule parameters together")
-        elif index and before_rule:
-            raise RuleNotValid("Cannot specify index and before_rule parameters together")
-        elif index and after_rule:
-            raise RuleNotValid("Cannot specify index and after_rule parameters together")
+        if index and (before_rule or after_rule):
+            raise RuleNotValid("Cannot specify index and before_rule/after_rule parameters at the same time")
         elif before_rule and after_rule:
-            raise RuleNotValid("Cannot specify before_rule and after_rule parameters together")
+            raise RuleNotValid("Cannot specify before_rule/after_rule parameters at the same time")
 
         if before_rule:
             if not self.exists(before_rule):
@@ -329,10 +320,11 @@ class Rules(object):
                 raise RuleNotValid("Rule index is out of range")
 
         if index:
-            if self._rules[name] == rule and self._rules_with_index[index] == name:
+            if self._rules[name] == rule and (index < len(self._rules_with_index) and self._rules_with_index[index] == name):
                 raise RuleNotUpdated("No changes detected")
 
-            if self._rules_with_index[index] != name:
+            # update rule's position
+            if index < len(self._rules_with_index) and self._rules_with_index[index] != name:
                 self._rules_with_index.remove(name)
                 self._rules_with_index.insert(index, name)
         else:
