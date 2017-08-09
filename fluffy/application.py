@@ -28,7 +28,8 @@ with open(logging_config, 'r') as stream:
 logger = logging.getLogger(__name__)
 if 'FLUFFY_LOGLEVEL' in os.environ:
     for name, logger in logging.Logger.manager.loggerDict.iteritems():
-        logger.setLevel(logging.getLevelName(os.environ['FLUFFY_LOGLEVEL']))
+        if hasattr(logger, 'setLevel'):
+            logger.setLevel(logging.getLevelName(os.environ['FLUFFY_LOGLEVEL']))
 
 fw = Fluffy.load_yaml(config_file)
 
