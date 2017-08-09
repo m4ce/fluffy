@@ -1,3 +1,9 @@
+## v0.0.10 [2017-08-09]
+
+### Bugfixes
+
+* Fixed session commit process. Rollback checks are now checked against the active configuration.
+
 ## v0.0.9 [2017-08-09]
 
 ### Release Notes
