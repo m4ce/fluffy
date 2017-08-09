@@ -769,7 +769,7 @@ class Session(object):
             raise SessionError("Configuration commit already in progress")
 
         if not force:
-            if dict(self._current_addressbook) == dict(self.addressbook) and dict(self._current_interfaces) == dict(self.interfaces) and dict(self._current_chains) == dict(self.chains) and dict(self._current_services) == dict(self.services) and OrderedDict(self._current_rules) == OrderedDict(self.rules):
+            if dict(self._current_addressbook) == dict(self.addressbook) and dict(self._current_interfaces) == dict(self.interfaces) and dict(self._current_chains) == dict(self.chains) and dict(self._current_services) == dict(self.services) and OrderedDict(self._current_rules) == OrderedDict(self.rules) and dict(self._current_checks) == dict(self.checks):
                 raise SessionError("No configuration changes detected")
 
         rules = self.build(chains=self.chains, interfaces=self.interfaces,
