@@ -118,7 +118,9 @@ class Rules(object):
         """
 
         for index, name in enumerate(self._rules_with_index):
-            yield name, dict(self._rules[name].items() + {'index': index}.items())
+            before_rule = self._rules_with_index[index + 1] if index < (len(self._rules_with_index) - 1) else None
+            after_rule = self._rules_with_index[index - 1] if index > 0 else None
+            yield name, dict(self._rules[name].items() + {'index': index, 'before_rule': before_rule, 'after_rule': after_rule}.items())
 
     def update_objref(self, obj):
         """Update the rules
@@ -170,12 +172,14 @@ class Rules(object):
         except:
             logger.exception("Failed to save rules")
 
-    def add(self, name, index=None, **kwargs):
+    def add(self, name, index=None, before_rule=None, after_rule=None, **kwargs):
         """Add a new rule
 
         Args:
             name (str): The rule name
-            index (Optional[int]): The rule index
+            before_rule (Optional[str]): Add the rule before the given rule
+            after_rule (Optional[str]): Add the rule after the given rule
+            index (Optional[int]): Rule index
             **kwargs: Arbitrary keyword arguments
 
         Raises:
@@ -212,13 +216,33 @@ class Rules(object):
         else:
             raise RuleNotValid("Rule chain is required")
 
+
         # validate rule
         try:
             self.validate(rule)
         except Exception as e:
             raise RuleNotValid(e.message)
 
-        if index:
+        if index and before_rule and after_rule:
+            raise RuleNotValid("Cannot specify index, before_rule and after_rule parameters together")
+        elif index and before_rule:
+            raise RuleNotValid("Cannot specify index and before_rule parameters together")
+        elif index and after_rule:
+            raise RuleNotValid("Cannot specify index and after_rule parameters together")
+        elif before_rule and after_rule:
+            raise RuleNotValid("Cannot specify before_rule and after_rule parameters together")
+
+        if before_rule:
+            if not self.exists(before_rule):
+                raise RuleNotValid("Before rule not found")
+
+            index = self._rules_with_index.index(before_rule)
+        elif after_rule:
+            if not self.exists(after_rule):
+                raise RuleNotValid("After rule not found")
+
+            index = self._rules_with_index.index(after_rule) + 1
+        elif index:
             if index < 0 or index > len(self._rules_with_index):
                 raise RuleNotValid("Rule index is out of range")
         else:
@@ -247,12 +271,14 @@ class Rules(object):
                 for srv in rule[attr_key]:
                     self.services.add_dep(service=srv, rule=name)
 
-    def update(self, name, index=None, **kwargs):
+    def update(self, name, index=None, before_rule=None, after_rule=None, **kwargs):
         """Update a rule
 
         Args:
             name (str): The rule name
             index (Optional[int]): The rule index
+            before_rule (Optional[str]): Move the rule before the given one
+            after_rule (Optional[str]): Move the rule after the given one
             **kwargs: Arbitrary keyword arguments
 
         Raises:
@@ -279,10 +305,30 @@ class Rules(object):
         except Exception as e:
             raise RuleNotValid(e.message)
 
-        if index:
+        if index and before_rule and after_rule:
+            raise RuleNotValid("Cannot specify index, before_rule and after_rule parameters together")
+        elif index and before_rule:
+            raise RuleNotValid("Cannot specify index and before_rule parameters together")
+        elif index and after_rule:
+            raise RuleNotValid("Cannot specify index and after_rule parameters together")
+        elif before_rule and after_rule:
+            raise RuleNotValid("Cannot specify before_rule and after_rule parameters together")
+
+        if before_rule:
+            if not self.exists(before_rule):
+                raise RuleNotValid("Before rule not found")
+
+            index = self._rules_with_index.index(before_rule)
+        elif after_rule:
+            if not self.exists(after_rule):
+                raise RuleNotValid("After rule not found")
+
+            index = self._rules_with_index.index(after_rule) + 1
+        elif index:
             if index < 0 or index > len(self._rules_with_index):
                 raise RuleNotValid("Rule index is out of range")
 
+        if index:
             if self._rules[name] == rule and self._rules_with_index[index] == name:
                 raise RuleNotUpdated("No changes detected")
 
@@ -634,4 +680,3 @@ class Rules(object):
             if isinstance(v, bool) and not isinstance(rule[k], bool):
                 raise Exception(
                     "Rule parameter '{}' must be type bool".format(k))
-
