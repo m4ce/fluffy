@@ -4,6 +4,7 @@
 
 * Enable uwsgi python plugin to initialize GIL
 * Fixed addressbook dependencies not being propagated after commiting and confirm the session configuration
+* Shutdown process is now properly handled upon receiving SIGTERM/SIGINT
 
 ## v0.0.10 [2017-08-09]
 
