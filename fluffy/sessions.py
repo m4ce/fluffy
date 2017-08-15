@@ -4,7 +4,6 @@ import copy
 import tempfile
 import subprocess32 as subprocess
 import glob
-import atexit
 import itertools
 from jinja2 import Environment, FileSystemLoader
 from threading import Timer, Thread, Lock
@@ -77,8 +76,6 @@ class Sessions(object):
             except Exception as e:
                 logger.exception("Failed to create sessions directory")
                 sys.exit(1)
-
-        atexit.register(self._exit)
 
     def __getitem__(self, key):
         """Retrieve a session
@@ -220,8 +217,8 @@ class Sessions(object):
         except KeyError:
             raise SessionNotFound("Session not found")
 
-    def _exit(self):
-        """Function invoked on exit"""
+    def shutdown(self):
+        """Function invoked on shutdown"""
 
         for name in self._sessions.keys():
             self.delete(name)

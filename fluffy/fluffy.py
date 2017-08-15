@@ -1,7 +1,7 @@
 import sys
 import os
 import yaml
-import atexit
+import signal
 from collections import OrderedDict
 from threading import Timer, Lock
 
@@ -69,8 +69,9 @@ class Fluffy(object):
         self._flush_timer.daemon = True
         self._flush_timer.start()
 
-        # register exit function
-        atexit.register(self._exit)
+        # register signal handlers
+        signal.signal(signal.SIGTERM, self._shutdown)
+        signal.signal(signal.SIGINT, self._shutdown)
 
         # load active rules
         self.load()
@@ -136,9 +137,17 @@ class Fluffy(object):
         self._flush_timer.daemon = True
         self._flush_timer.start()
 
-    def _exit(self):
+    def _shutdown(self):
         logger.info("Shutdown in progress - flushing configuration")
         self.flush()
+
         logger.debug("Canceling configuration flush timer")
         if self._flush_timer:
             self._flush_timer.cancel()
+
+        # shutdown all sessions
+        logger.debug("Shutting down all active sessions")
+        self.sessions.shutdown()
+
+        # exit finally
+        sys.exit(0)
