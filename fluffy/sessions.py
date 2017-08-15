@@ -325,8 +325,6 @@ class Session(object):
         self._confirm_lock = Lock()
         """Lock: The session confirm lock"""
 
-        atexit.register(self.close)
-
     def name(self):
         """Returns the session's name
 
