@@ -29,7 +29,7 @@ def addressbook():
 def addressbook_get(address_name):
     try:
         recurse = boolify(request.args.get('recurse', False))
-        return jsonify(dict(fw.addressbook.lookup(address_name, recurse=recurse)))
+        return jsonify(fw.addressbook.lookup(address_name, recurse=recurse))
     except AddressNotFound as e:
         http_code = status.HTTP_404_NOT_FOUND
     except Exception as e:
@@ -55,7 +55,7 @@ def session_addressbook(session_name):
 def session_addressbook_get(session_name, address_name):
     try:
         recurse = boolify(request.args.get('recurse', False))
-        return jsonify(dict(fw.sessions[session_name].addressbook.lookup(address_name, recurse=recurse)))
+        return jsonify(fw.sessions[session_name].addressbook.lookup(address_name, recurse=recurse))
     except AddressNotFound as e:
         http_code = status.HTTP_404_NOT_FOUND
     except Exception as e:

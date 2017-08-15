@@ -1,3 +1,10 @@
+## v0.0.11 [2017-08-09]
+
+### Bugfixes
+
+* Enable uwsgi python plugin to initialize GIL
+* Fixed addressbook dependencies not being propagated after commiting and confirm the session configuration
+
 ## v0.0.10 [2017-08-09]
 
 ### Bugfixes

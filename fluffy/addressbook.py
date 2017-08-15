@@ -81,7 +81,18 @@ class AddressBook(object):
         """
 
         self._addressbook = obj.addressbook()
+        self._addressbook_deps = obj.addressbook_deps()
         self._rule_deps = obj.rule_deps()
+
+    def addressbook_deps(self):
+        """Retrieve the address dependencies in the addressbook
+
+        Returns:
+            dict: A dictionary describing the address dependencies
+
+        """
+
+        return self._addressbook_deps
 
     def rule_deps(self):
         """Retrieve the rules dependencies on the addressbook
