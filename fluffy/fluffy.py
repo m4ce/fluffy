@@ -137,7 +137,7 @@ class Fluffy(object):
         self._flush_timer.daemon = True
         self._flush_timer.start()
 
-    def _shutdown(self):
+    def _shutdown(self, *args, **kwargs):
         logger.info("Shutdown in progress - flushing configuration")
         self.flush()
 
