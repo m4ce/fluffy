@@ -1,3 +1,9 @@
+## v0.0.12 [2017-08-16]
+
+### Release Notes
+
+* Dropped support for uWSGI
+
 ## v0.0.11 [2017-08-16]
 
 ### Bugfixes
